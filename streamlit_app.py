@@ -9,7 +9,9 @@ st.title("Distribution Center Optimization Dashboard")
 # --- Load Data ---
 @st.cache_data
 def load_data():
-    url = "https://drive.google.com/file/d/1VW3Kng9mu7EzAs7tkCZf-CUzllKaaFpf/view?usp=drive_link"
+    # Replace with your actual file ID
+    file_id = "1VW3Kng9mu7EzAs7tkCZf-CUzllKaaFpf"
+    url = f"https://drive.google.com/uc?id={file_id}"
     df = pd.read_csv(url)
     return df
 
