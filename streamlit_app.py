@@ -1,120 +1,170 @@
 import streamlit as st
 import pandas as pd
-import numpy as np
-import joblib
+import plotly.express as px
 
-# Load model
-model = joblib.load("best_random_forest_model.pkl")
+# --- Page Setup ---
+st.set_page_config(page_title="DC Placement App", layout="wide")
+st.title("Distribution Center Optimization Dashboard")
 
-st.set_page_config(page_title="DC Delivery Time Improvement Predictor", layout="wide")
-st.title("📦 New DC Delivery Time Improvement Predictor")
+# --- Load Data ---
+@st.cache_data
+def load_data():
+    df = pd.read_csv("clustered_df.csv")
+    return df
 
-st.markdown("This tool predicts whether delivery time will improve if a customer is served from a proposed new Distribution Center (DC).")
+df = load_data()
 
-# --- User Input Section ---
-st.sidebar.header("🔧 Input Features")
+# --- Create Tabs Instead of Sidebar Navigation ---
+tab1, tab2 = st.tabs(["New DC Placement", "Delivery Time Improvement Prediction"])
 
-# Numeric Inputs
-product_category = st.sidebar.selectbox("Product Category (encoded)", [0, 1, 2])
-num_of_item = st.sidebar.slider("Number of Items", 1, 10, 1)
-country = st.sidebar.selectbox("Country (encoded)", [0, 1, 2])
-user_latitude = st.sidebar.number_input("User Latitude", value=1.0)
-distribution_center_latitude = st.sidebar.number_input("Old DC Latitude", value=1.0)
-distribution_center_longitude = st.sidebar.number_input("Old DC Longitude", value=1.0)
-new_dc_latitude = st.sidebar.number_input("New DC Latitude", value=1.0)
-new_dc_longitude = st.sidebar.number_input("New DC Longitude", value=1.0)
-delivery_time_days = st.sidebar.number_input("Old Delivery Time (days)", value=3.0)
-processing_delay_time_days = st.sidebar.number_input("Processing Delay (days)", value=1.0)
-order_dayofweek = st.sidebar.selectbox("Order Day of Week", list(range(7)))
-order_month = st.sidebar.selectbox("Order Month", list(range(1, 13)))
-order_volume = st.sidebar.slider("Order Volume", 1, 100, 10)
-cluster = st.sidebar.selectbox("Cluster ID", list(range(10)))
-delivery_time_hour = st.sidebar.number_input("Delivery Time (hours)", value=24.0)
-delivery_speed_kmph = st.sidebar.number_input("Delivery Speed (km/h)", value=60.0)
+# --- TAB 1: New DC Suggestion ---
+with tab1:
+    st.header("New Distribution Center Suggestion")
+    st.markdown("Use one of the options below to explore potential locations for new distribution centers.")
 
-# Boolean Inputs
-is_weekend_order = st.sidebar.checkbox("Is Weekend Order", value=False)
-status_Returned = st.sidebar.checkbox("Was Returned", value=False)
-product_department_Women = st.sidebar.checkbox("Women's Product", value=False)
-gender_M = st.sidebar.checkbox("Customer is Male", value=False)
+    suggestion_option = st.selectbox("Select Suggestion Method:", [
+        "Cluster-Based DC Suggestion",
+        "Manual DC Simulation"
+    ])
 
-# Traffic Source
-traffic_source_Email = st.sidebar.checkbox("Source: Email", value=False)
-traffic_source_Facebook = st.sidebar.checkbox("Source: Facebook", value=False)
-traffic_source_Organic = st.sidebar.checkbox("Source: Organic", value=True)
-traffic_source_Search = st.sidebar.checkbox("Source: Search", value=False)
+    if suggestion_option == "Cluster-Based DC Suggestion":
+        result_option = st.selectbox("Select Suggestion Result:", [
+            "New DC Location",
+            "Clustering Report"
+        ])
 
-# DC Names (One-hot encoded)
-st.sidebar.markdown("### Old DC Location")
-dc_cols = [
-    "Chicago IL", "Houston TX", "Los Angeles CA", "Memphis TN", "Mobile AL",
-    "New Orleans LA", "Philadelphia PA", "Port Authority of New York/New Jersey NY/NJ", "Savannah GA"
-]
-dc_selected = st.sidebar.selectbox("Old DC Name", dc_cols)
-dc_encoded = [dc_selected == name for name in dc_cols]
+        state_level_df = df.drop_duplicates(subset=["state"])[
+            ["state", "order_volume", "avg_delivery_time_days", "state_latitude", "state_longitude", "cluster", "new_dc_latitude", "new_dc_longitude"]
+        ].sort_values("state")
 
-# Age group
-user_age_group_senior = st.sidebar.checkbox("User is Senior", value=False)
-user_age_group_teen = st.sidebar.checkbox("User is Teen", value=False)
+        state_level_df["cluster"] = state_level_df["cluster"].astype(str)
 
-# Log values (replace with transformation if needed)
-log_cost = np.log(10)
-log_product_retail_price = np.log(50)
-log_sale_price = np.log(40)
-avg_delivery_time_days = st.sidebar.number_input("Average Delivery Time (days)", value=3.5)
+        if result_option == "New DC Location":
+            st.markdown("### New Distribution Center Location")
+            st.markdown("The map below shows the location of new dc.")
 
-# --- Prepare Input for Model ---
-input_data = pd.DataFrame([[
-    product_category,
-    num_of_item,
-    country,
-    user_latitude,
-    distribution_center_latitude,
-    distribution_center_longitude,
-    delivery_time_days,
-    processing_delay_time_days,
-    order_dayofweek,
-    order_month,
-    is_weekend_order,
-    user_latitude,  # state_latitude = assume same as user_latitude
-    log_cost,
-    log_product_retail_price,
-    log_sale_price,
-    order_volume,
-    avg_delivery_time_days,
-    cluster,
-    new_dc_latitude,
-    new_dc_longitude,
-    delivery_time_hour,
-    delivery_speed_kmph,
-    status_Returned,
-    product_department_Women,
-    gender_M,
-    traffic_source_Email,
-    traffic_source_Facebook,
-    traffic_source_Organic,
-    traffic_source_Search,
-    *dc_encoded,
-    user_age_group_senior,
-    user_age_group_teen
-]], columns=[
-    'product_category', 'num_of_item', 'country', 'user_latitude',
-    'distribution_center_latitude', 'distribution_center_longitude',
-    'delivery_time_days', 'processing_delay_time_days', 'order_dayofweek',
-    'order_month', 'is_weekend_order', 'state_latitude', 'log_cost',
-    'log_product_retail_price', 'log_sale_price', 'order_volume',
-    'avg_delivery_time_days', 'cluster', 'new_dc_latitude', 'new_dc_longitude',
-    'delivery_time_hour', 'delivery_speed_kmph', 'status_Returned',
-    'product_department_Women', 'gender_M', 'traffic_source_Email',
-    'traffic_source_Facebook', 'traffic_source_Organic', 'traffic_source_Search',
-    'distribution_center_name_Chicago IL', 'distribution_center_name_Houston TX',
-    'distribution_center_name_Los Angeles CA', 'distribution_center_name_Memphis TN',
-    'distribution_center_name_Mobile AL', 'distribution_center_name_New Orleans LA',
-    'distribution_center_name_Philadelphia PA', 'distribution_center_name_Port Authority of New York/New Jersey NY/NJ',
-    'distribution_center_name_Savannah GA', 'user_age_group_senior', 'user_age_group_teen'
-])
+            fig_map = px.scatter_mapbox(
+                state_level_df,
+                lat="new_dc_latitude",
+                lon="new_dc_longitude",
+                color="cluster",
+                hover_name="state",
+                hover_data={"cluster": True},
+                zoom=2,
+                height=500
+            )
+            fig_map.update_layout(mapbox_style="open-street-map")
+            fig_map.update_traces(marker=dict(size=10, opacity=1.0))
+            st.plotly_chart(fig_map, use_container_width=True)
 
-# --- Make Prediction ---
-if st.button("🔍 Predict Delivery Time Improvement"):
-    prediction = model.predict(input_data)[0]
-    st.success("✅ Delivery time will improve!" if prediction == 1 else "❌ No improvement in delivery time.")
+        elif result_option == "Clustering Report":
+            # Section 1: Order volume & Avg delivery time
+            st.markdown("### State-Level Summary")
+            st.markdown("Below are the visualizations of order volume and average delivery time by state from the clustered dataset.")
+
+            col1, col2 = st.columns(2)
+            with col1:
+                top_n = st.selectbox("Select number of states to display", [10, 20, 30, 40, 50], index=1)
+            with col2:
+                sort_order = st.selectbox("Sort by:", ["Lowest", "Highest"])
+
+            sort_ascending = sort_order == "Lowest"
+
+            top_order_volume_df = state_level_df.sort_values("order_volume", ascending=sort_ascending).head(top_n)
+            fig_order = px.bar(
+                top_order_volume_df,
+                x="state",
+                y="order_volume",
+                title="Order Volume",
+                labels={"order_volume": "Order Volume", "state": "State"},
+                color="order_volume",
+                color_continuous_scale="Blues"
+            )
+            st.plotly_chart(fig_order, use_container_width=True)
+
+            top_delivery_df = state_level_df.sort_values("avg_delivery_time_days", ascending=sort_ascending).head(top_n)
+            fig_delivery = px.bar(
+                top_delivery_df,
+                x="state",
+                y="avg_delivery_time_days",
+                title="Avg Delivery Time (Days)",
+                labels={"avg_delivery_time_days": "Avg Delivery Time (Days)", "state": "State"},
+                color="avg_delivery_time_days",
+                color_continuous_scale="Oranges"
+            )
+            st.plotly_chart(fig_delivery, use_container_width=True)
+
+            # Section 2: Cluster map
+            st.markdown("### Cluster Map")
+            st.markdown("The map below shows the location of each state, colored by assigned cluster.")
+
+            fig_map = px.scatter_mapbox(
+                state_level_df,
+                lat="state_latitude",
+                lon="state_longitude",
+                color="cluster",
+                hover_name="state",
+                hover_data={"cluster": True},
+                zoom=2,
+                height=500
+            )
+            fig_map.update_layout(mapbox_style="open-street-map")
+            fig_map.update_traces(marker=dict(size=10, opacity=1.0))
+            st.plotly_chart(fig_map, use_container_width=True)
+
+            # Section 3: Cluster demand ranking
+            st.markdown("### Demand Ranking")
+            st.markdown("Clusters are ranked based on their total composite weight (indicating demand concentration).")
+            df["cluster"] = df["cluster"].astype(str)
+
+            cluster_ranking = (
+                df.groupby("cluster")["composite_weight"]
+                .sum()
+                .sort_values(ascending=False)
+                .reset_index()
+            )
+
+            for i, row in cluster_ranking.iterrows():
+                cluster_id = row["cluster"]
+                st.markdown(f"**{i+1}. Cluster {cluster_id}**")
+
+                cluster_data = state_level_df[state_level_df["cluster"] == cluster_id]
+                total_states = cluster_data["state"].nunique()
+                list_states = sorted(cluster_data["state"].unique().tolist())
+                total_order_volume = cluster_data["order_volume"].mean()
+                avg_delivery_time = cluster_data["avg_delivery_time_days"].mean()
+
+                with st.expander("Expand for detail"):
+                    st.markdown(f"**Total number of states**: `{total_states}`")
+                    st.markdown(f"**Average order volume**: `{total_order_volume:,}`")
+                    st.markdown(f"**Average delivery time (days)**: `{avg_delivery_time:.2f}`")
+
+    elif suggestion_option == "Manual DC Simulation":
+        st.subheader("Manual DC Simulation")
+        st.markdown("Simulate multiple proposed DC locations by entering coordinates below.")
+
+        # Step 1: Let user input how many DCs they want to enter
+        num_points = st.number_input("Enter number of proposed DC locations:", min_value=1, max_value=10, value=1, step=1)
+
+        # Step 2: Show input fields dynamically based on that number
+        new_dc_locations = []
+        for i in range(int(num_points)):
+            st.markdown(f"#### 📍 DC Location {i + 1}")
+            col1, col2 = st.columns(2)
+            with col1:
+                lat = st.number_input(f"Latitude {i + 1}", key=f"lat_{i}", value=2.5, format="%.6f")
+            with col2:
+                lon = st.number_input(f"Longitude {i + 1}", key=f"lon_{i}", value=102.5, format="%.6f")
+            new_dc_locations.append((lat, lon))
+
+        # Step 3: Simulate Button — FIXED with a key
+        if st.button("Simulate", key="simulate_dc_locations"):
+            st.success("Simulation initiated for the following locations:")
+            for i, (lat, lon) in enumerate(new_dc_locations, 1):
+                st.markdown(f"- **Location {i}**: (`{lat:.6f}`, `{lon:.6f}`)")
+
+# --- TAB 2: Delivery Time Improvement Prediction ---
+with tab2:
+    st.header("Delivery Time Improvement Prediction")
+    st.markdown("This section uses a trained ML model to predict whether delivery time improves with a new DC.")
+    st.success("Delivery Time Improvement Prediction interface loaded!")
