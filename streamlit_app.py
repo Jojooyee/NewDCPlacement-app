@@ -1,6 +1,8 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+import numpy as np
+import joblib
 
 # --- Page Setup ---
 st.set_page_config(page_title="DC Placement App", layout="wide")
@@ -16,6 +18,9 @@ def load_data():
     return df
 
 df = load_data()
+
+# --- Load Pipeline ---
+preprocessing_pipeline = joblib.load('preprocessing_pipeline.pkl')
 
 # --- Create Tabs Instead of Sidebar Navigation ---
 tab1, tab2 = st.tabs(["New DC Placement", "Delivery Time Improvement Prediction"])
@@ -43,6 +48,16 @@ with tab1:
         state_level_df["cluster"] = state_level_df["cluster"].astype(str)
 
         if result_option == "New DC Location":
+            # Section 1: List of new dc location
+            st.markdown("### Suggested New DC Coordinates")
+            st.markdown("The list below shows the location of new dc by cluster.")
+
+            unique_dc_locations = state_level_df.groupby("cluster")[["new_dc_latitude", "new_dc_longitude"]].first().reset_index()
+
+            for _, row in unique_dc_locations.iterrows():
+                st.markdown(f"**Cluster {row['cluster']}**: ({row['new_dc_latitude']:.4f}, {row['new_dc_longitude']:.4f})")
+
+            # Section 2: New dc location in map
             st.markdown("### New Distribution Center Location")
             st.markdown("The map below shows the location of new dc.")
 
@@ -162,9 +177,63 @@ with tab1:
 
         # Step 3: Simulate Button — FIXED with a key
         if st.button("Simulate", key="simulate_dc_locations"):
-            st.success("Simulation initiated for the following locations:")
-            for i, (lat, lon) in enumerate(new_dc_locations, 1):
-                st.markdown(f"- **Location {i}**: (`{lat:.6f}`, `{lon:.6f}`)")
+
+            def haversine(lat1, lon1, lat2, lon2):
+                R = 6371  # km
+                lat1, lon1, lat2, lon2 = map(np.radians, [lat1, lon1, lat2, lon2])
+
+                dlat = lat2 - lat1
+                dlon = lon2 - lon1
+
+                a = np.sin(dlat / 2.0)**2 + np.cos(lat1) * np.cos(lat2) * np.sin(dlon / 2.0)**2
+                c = 2 * np.arctan2(np.sqrt(a), np.sqrt(1 - a))
+
+                return R * c
+
+            updated_rows = []
+
+            for idx, row in df.iterrows():
+                user_lat = row["user_latitude"]
+                user_lon = row["user_longitude"]
+
+                # Calculate distance from user to every manually entered DC
+                distances = []
+                for dc_lat, dc_lon in new_dc_locations:
+                    distance = haversine(user_lat, user_lon, dc_lat, dc_lon)
+                    distances.append((distance, dc_lat, dc_lon))
+
+                # Find the nearest DC
+                min_distance, nearest_lat, nearest_lon = min(distances, key=lambda x: x[0])
+
+                # Create updated row
+                updated_row = row.copy()
+                updated_row["new_dc_latitude"] = nearest_lat
+                updated_row["new_dc_longitude"] = nearest_lon
+                updated_row["distance_new_dc_to_user_km"] = min_distance
+
+                updated_rows.append(updated_row)
+
+            # Create a new DataFrame with the updated values
+            simulated_df = pd.DataFrame(updated_rows)
+
+            # Convert delivery time from days to hours
+            simulated_df['delivery_time_hour'] = simulated_df["delivery_time_days"] * 24
+
+            # Calculate delivery speed (km/hour)
+            simulated_df["delivery_speed_kmph"] = simulated_df["distance_dc_to_user_km"] / simulated_df['delivery_time_hour']
+
+            # Estimate new delivery time in hours using the same speed
+            simulated_df["estimated_new_delivery_time"] = simulated_df["distance_new_dc_to_user_km"] / simulated_df["delivery_speed_kmph"]
+
+            # Calculate improvement in hours
+            simulated_df["delivery_time_improvement"] = simulated_df["delivery_time_hour"] - simulated_df["estimated_new_delivery_time"]
+
+            simulated_processed = preprocessing_pipeline.transform(simulated_df)
+
+            # Show preview
+            st.markdown("### 🔍 Nearest DC Assigned to Each User")
+            st.dataframe(simulated_df)
+            
 
 # --- TAB 2: Delivery Time Improvement Prediction ---
 with tab2:
