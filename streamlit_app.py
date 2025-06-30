@@ -73,6 +73,50 @@ with tab1:
         fig_map.update_traces(marker=dict(size=10, opacity=1.0))
         st.plotly_chart(fig_map, use_container_width=True)
 
+        # Section 3: Predict delivery time improvement for clustered DC suggestion
+        st.markdown("### 🧠 Predicted Delivery Time Improvement (Cluster-Based)")
+
+        # Transform using preprocessing pipeline
+        clustered_processed = preprocessing_pipeline.transform(df)
+
+        # Predict using the model
+        cluster_predictions = model.predict(clustered_processed)
+        cluster_probabilities = model.predict_proba(clustered_processed)[:, 1]
+
+        # Append to original dataframe
+        df["delivery_time_improvement_pred"] = cluster_predictions
+        df["improvement_probability"] = cluster_probabilities
+
+        # Show a preview
+        st.dataframe(df[[
+            "user_latitude", "user_longitude", "new_dc_latitude", "new_dc_longitude",
+            "delivery_time_hour", "estimated_new_delivery_time",
+            "delivery_time_improvement", "delivery_time_improvement_pred", "improvement_probability"
+        ]].head(15))
+
+        # Visualize prediction on map
+        st.markdown("### 🔍 Prediction Map: Users Colored by Improvement Prediction")
+
+        df["prediction_label"] = df["delivery_time_improvement_pred"].map({1: "Improved", 0: "No Improvement"})
+
+        fig_prediction_map = px.scatter_mapbox(
+            df,
+            lat="user_latitude",
+            lon="user_longitude",
+            color="prediction_label",
+            hover_data={
+                "improvement_probability": True,
+                "delivery_time_improvement": True,
+                "new_dc_latitude": True,
+                "new_dc_longitude": True
+            },
+            zoom=4,
+            height=500
+        )
+        fig_prediction_map.update_layout(mapbox_style="open-street-map")
+        fig_prediction_map.update_traces(marker=dict(size=8, opacity=0.8))
+        st.plotly_chart(fig_prediction_map, use_container_width=True)
+
     elif result_option == "Clustering Report":
         # Section 1: Order volume & Avg delivery time
         st.markdown("### State-Level Summary")
