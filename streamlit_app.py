@@ -260,6 +260,9 @@ with tab2:
         # Calculate improvement in hours
         simulated_df["delivery_time_improvement"] = simulated_df["delivery_time_hour"] - simulated_df["estimated_new_delivery_time"]
 
+        st.markdown("### 📄 Simulated Delivery Data Preview")
+        st.dataframe(simulated_df)
+
         simulated_processed = preprocessing_pipeline.transform(simulated_df)
 
         # --- Make prediction (binary classification: 1 = improvement, 0 = no improvement) ---
