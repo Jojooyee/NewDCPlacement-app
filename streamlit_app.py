@@ -24,7 +24,7 @@ df = load_data()
 preprocessing_pipeline = joblib.load("preprocessing_pipeline.pkl")
 
 # --- Load trained prediction model ---
-model = joblib.load("delivery_improvement_model.pkl")
+model = joblib.load("best_random_forest_model.pkl")
 
 # --- Create Tabs Instead of Sidebar Navigation ---
 tab1, tab2 = st.tabs(["New DC Placement", "Delivery Time Improvement Prediction"])
