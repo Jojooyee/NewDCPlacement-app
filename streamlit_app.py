@@ -169,9 +169,9 @@ with tab2:
         st.markdown(f"#### 📍 DC Location {i + 1}")
         col1, col2 = st.columns(2)
         with col1:
-            lat = st.number_input(f"Latitude {i + 1}", key=f"lat_{i}", value=2.5, format="%.6f")
+            lat = st.number_input(f"Latitude {i + 1}", key=f"lat_{i}", value=0.0, format="%.6f")
         with col2:
-            lon = st.number_input(f"Longitude {i + 1}", key=f"lon_{i}", value=102.5, format="%.6f")
+            lon = st.number_input(f"Longitude {i + 1}", key=f"lon_{i}", value=0.0, format="%.6f")
         new_dc_locations.append((lat, lon))
 
     # Step 3: Simulate Button — FIXED with a key
