@@ -7,7 +7,7 @@ from preprocessing_utils import HighCardinalityDropper, ColumnDropper
 
 # --- Page Setup ---
 st.set_page_config(page_title="DC Placement App", layout="wide")
-st.title("Distribution Center Optimization Dashboard")
+st.title("Distribution Center Suggestion Dashboard")
 
 # --- Load Data ---
 @st.cache_data
