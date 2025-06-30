@@ -27,12 +27,12 @@ uploaded_file = st.sidebar.file_uploader("Choose a CSV file", type=["csv"])
 if uploaded_file is not None:
     try:
         df = pd.read_csv(uploaded_file)
-        st.success("✅ Dataset loaded successfully.")
+        st.success("Dataset loaded successfully.")
     except Exception as e:
-        st.error(f"❌ Error reading file: {e}")
+        st.error(f"Error reading file: {e}")
         st.stop()
 else:
-    st.warning("⚠️ Please upload a CSV file to continue.")
+    st.warning("Please upload a CSV file to continue.")
     st.stop()
 
 # --- Load Pipeline ---
@@ -181,7 +181,7 @@ with tab2:
     # Step 2: Show input fields dynamically based on that number
     new_dc_locations = []
     for i in range(int(num_points)):
-        st.markdown(f"#### 📍 DC Location {i + 1}")
+        st.markdown(f"#### DC Location {i + 1}")
         col1, col2 = st.columns(2)
         with col1:
             lat = st.number_input(f"Latitude {i + 1}", key=f"lat_{i}", value=0.0, format="%.6f")
@@ -267,7 +267,7 @@ with tab2:
         simulated_df["delivery_time_improvement_pred"] = predictions
         simulated_df["improvement_probability"] = prediction_probs
 
-        st.markdown("### 📊 Prediction Summary")
+        st.markdown("### Prediction Summary")
         improve_count = (simulated_df["delivery_time_improvement_pred"] == 1).sum()
         no_improve_count = (simulated_df["delivery_time_improvement_pred"] == 0).sum()
             
