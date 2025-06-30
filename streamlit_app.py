@@ -181,6 +181,24 @@ with tab1:
 
         # Step 3: Simulate Button — FIXED with a key
         if st.button("Simulate", key="simulate_dc_locations"):
+    
+            # Step 2.5: Plot user-input coordinates on a map
+            if new_dc_locations:
+                st.markdown("### 🗺️ Preview of Proposed DC Locations")
+                user_dc_df = pd.DataFrame(new_dc_locations, columns=["lat", "lon"])
+                user_dc_df["dc_id"] = [f"DC {i+1}" for i in range(len(new_dc_locations))]
+    
+                fig_user_dc = px.scatter_mapbox(
+                    user_dc_df,
+                    lat="lat",
+                    lon="lon",
+                    hover_name="dc_id",
+                    zoom=4,
+                    height=400
+                )
+                fig_user_dc.update_layout(mapbox_style="open-street-map")
+                fig_user_dc.update_traces(marker=dict(size=10, color="red"))
+                st.plotly_chart(fig_user_dc, use_container_width=True)
 
             def haversine(lat1, lon1, lat2, lon2):
                 R = 6371  # km
