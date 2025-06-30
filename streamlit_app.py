@@ -235,8 +235,20 @@ with tab1:
             st.markdown("### 🔍 Nearest DC Assigned to Each User")
             st.dataframe(simulated_df)
 
-            st.dataframe(simulated_processed)
-            
+                        # Show processed result (first 10 rows)
+            st.markdown("### 🔄 Processed Features (Transformed by Pipeline)")
+
+            # Convert to DataFrame for display (optional: get feature names if available)
+            try:
+                # If your pipeline supports get_feature_names_out
+                feature_names = preprocessing_pipeline.named_steps["encode_columns"].get_feature_names_out()
+                processed_df = pd.DataFrame(simulated_processed, columns=feature_names)
+            except:
+                # Fallback: Just show as numeric DataFrame
+                processed_df = pd.DataFrame(simulated_processed)
+
+            st.dataframe(processed_df.head(10))  # show first 10 rows
+
 
 # --- TAB 2: Delivery Time Improvement Prediction ---
 with tab2:
