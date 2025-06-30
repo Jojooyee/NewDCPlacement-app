@@ -10,15 +10,30 @@ st.set_page_config(page_title="DC Placement App", layout="wide")
 st.title("Distribution Center Suggestion Dashboard")
 
 # --- Load Data ---
-@st.cache_data
-def load_data():
-    # Replace with your actual file ID
-    file_id = "1i8MgGX0xBguihN8SzMQwoQZ3p1jJ3Pgo"
-    url = f"https://drive.google.com/uc?id={file_id}"
-    df = pd.read_csv(url)
-    return df
+# @st.cache_data
+# def load_data():
+#     # Replace with your actual file ID
+#     file_id = "1i8MgGX0xBguihN8SzMQwoQZ3p1jJ3Pgo"
+#     url = f"https://drive.google.com/uc?id={file_id}"
+#     df = pd.read_csv(url)
+#     return df
 
-df = load_data()
+# df = load_data()
+
+# --- Upload Dataset ---
+st.sidebar.markdown("## 📤 Upload Dataset")
+uploaded_file = st.sidebar.file_uploader("Choose a CSV file", type=["csv"])
+
+if uploaded_file is not None:
+    try:
+        df = pd.read_csv(uploaded_file)
+        st.success("✅ Dataset loaded successfully.")
+    except Exception as e:
+        st.error(f"❌ Error reading file: {e}")
+        st.stop()
+else:
+    st.warning("⚠️ Please upload a CSV file to continue.")
+    st.stop()
 
 # --- Load Pipeline ---
 preprocessing_pipeline = joblib.load("preprocessing_pipeline.pkl")
