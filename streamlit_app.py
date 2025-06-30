@@ -247,21 +247,15 @@ with tab2:
 
         # Create a new DataFrame with the updated values
         simulated_df = pd.DataFrame(updated_rows)
-
+        
         # Convert delivery time from days to hours
         simulated_df['delivery_time_hour'] = simulated_df["delivery_time_days"] * 24
-
         # Calculate delivery speed (km/hour)
         simulated_df["delivery_speed_kmph"] = simulated_df["distance_dc_to_user_km"] / simulated_df['delivery_time_hour']
-
         # Estimate new delivery time in hours using the same speed
         simulated_df["estimated_new_delivery_time"] = simulated_df["distance_new_dc_to_user_km"] / simulated_df["delivery_speed_kmph"]
-
         # Calculate improvement in hours
         simulated_df["delivery_time_improvement"] = simulated_df["delivery_time_hour"] - simulated_df["estimated_new_delivery_time"]
-
-        st.markdown("### 📄 Simulated Delivery Data Preview")
-        st.dataframe(simulated_df)
 
         simulated_processed = preprocessing_pipeline.transform(simulated_df)
 
