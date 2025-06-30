@@ -242,13 +242,20 @@ with tab1:
             simulated_df["delivery_time_improvement_pred"] = predictions
             simulated_df["improvement_probability"] = prediction_probs
 
-            # --- Display results ---
-            st.markdown("### 🧠 Delivery Time Improvement Prediction")
-            st.dataframe(simulated_df[[
-                "user_latitude", "user_longitude", "new_dc_latitude", "new_dc_longitude",
-                "delivery_time_hour", "estimated_new_delivery_time",
-                "delivery_time_improvement", "delivery_time_improvement_pred", "improvement_probability"
-            ]].head(15))
+            st.markdown("### 📊 Prediction Summary")
+            improve_count = (simulated_df["delivery_time_improvement_pred"] == 1).sum()
+            no_improve_count = (simulated_df["delivery_time_improvement_pred"] == 0).sum()
+            
+            st.write(f"**Users with Improved Delivery**: {improve_count}")
+            st.write(f"**Users with No Improvement**: {no_improve_count}")
+            
+            # Optional: Pie chart
+            fig_pie = px.pie(
+                names=["Improved", "No Improvement"],
+                values=[improve_count, no_improve_count],
+                title="Delivery Improvement Prediction Results"
+            )
+            st.plotly_chart(fig_pie, use_container_width=True)
 
             st.success("Prediction completed. Results shown above.")
 
