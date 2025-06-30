@@ -10,26 +10,13 @@ st.set_page_config(page_title="DC Placement App", layout="wide")
 st.title("Distribution Center Suggestion Dashboard")
 
 # --- Load Data ---
-# @st.cache_data
-# def load_data():
-#     # Replace with your actual file ID
-#     file_id = "1i8MgGX0xBguihN8SzMQwoQZ3p1jJ3Pgo"
-#     url = f"https://drive.google.com/uc?id={file_id}"
-#     df = pd.read_csv(url)
-#     return df
-
-# df = load_data()
-
 @st.cache_data
 def load_data():
+    # Replace with your actual file ID
     file_id = "1i8MgGX0xBguihN8SzMQwoQZ3p1jJ3Pgo"
     url = f"https://drive.google.com/uc?id={file_id}"
-    try:
-        df = pd.read_csv(url, on_bad_lines='skip')  # ✅ Skip malformed rows
-        return df
-    except Exception as e:
-        st.error("❌ Failed to load data. Please check if the CSV format is valid.")
-        st.stop()
+    df = pd.read_csv(url)
+    return df
 
 df = load_data()
 
