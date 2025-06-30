@@ -257,17 +257,6 @@ with tab1:
             )
             st.plotly_chart(fig_pie, use_container_width=True)
 
-            st.markdown("### 📈 Prediction Confidence Distribution")
-            fig_conf = px.histogram(
-                simulated_df,
-                x="improvement_probability",
-                nbins=30,
-                title="Prediction Confidence (Probability of Improvement)",
-                color="delivery_time_improvement_pred",
-                labels={"improvement_probability": "Probability"}
-            )
-            st.plotly_chart(fig_conf, use_container_width=True)
-
             st.success("Prediction completed. Results shown above.")
 
 # --- TAB 2: Delivery Time Improvement Prediction ---
