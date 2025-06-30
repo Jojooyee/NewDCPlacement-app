@@ -231,24 +231,26 @@ with tab1:
 
             simulated_processed = preprocessing_pipeline.transform(simulated_df)
 
-            # Show preview
-            st.markdown("### 🔍 Nearest DC Assigned to Each User")
-            st.dataframe(simulated_df)
+            # --- Load trained prediction model ---
+            model = joblib.load("delivery_improvement_model.pkl")
 
-                        # Show processed result (first 10 rows)
-            st.markdown("### 🔄 Processed Features (Transformed by Pipeline)")
+            # --- Make prediction (binary classification: 1 = improvement, 0 = no improvement) ---
+            predictions = model.predict(simulated_processed)
+            prediction_probs = model.predict_proba(simulated_processed)[:, 1]  # Probabilities for class 1
 
-            # Convert to DataFrame for display (optional: get feature names if available)
-            try:
-                # If your pipeline supports get_feature_names_out
-                feature_names = preprocessing_pipeline.named_steps["encode_columns"].get_feature_names_out()
-                processed_df = pd.DataFrame(simulated_processed, columns=feature_names)
-            except:
-                # Fallback: Just show as numeric DataFrame
-                processed_df = pd.DataFrame(simulated_processed)
+            # --- Append predictions to DataFrame ---
+            simulated_df["delivery_time_improvement_pred"] = predictions
+            simulated_df["improvement_probability"] = prediction_probs
 
-            st.dataframe(processed_df.head(10))  # show first 10 rows
+            # --- Display results ---
+            st.markdown("### 🧠 Delivery Time Improvement Prediction")
+            st.dataframe(simulated_df[[
+                "user_latitude", "user_longitude", "new_dc_latitude", "new_dc_longitude",
+                "delivery_time_hour", "estimated_new_delivery_time",
+                "delivery_time_improvement", "delivery_time_improvement_pred", "improvement_probability"
+            ]].head(15))
 
+            st.success("Prediction completed. Results shown above.")
 
 # --- TAB 2: Delivery Time Improvement Prediction ---
 with tab2:
