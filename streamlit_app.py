@@ -20,7 +20,7 @@ def load_data():
 df = load_data()
 
 # --- Load Pipeline ---
-preprocessing_pipeline = joblib.load('preprocessing_pipeline.pkl')
+preprocessing_pipeline = joblib.load("preprocessing_pipeline.pkl")
 
 # --- Create Tabs Instead of Sidebar Navigation ---
 tab1, tab2 = st.tabs(["New DC Placement", "Delivery Time Improvement Prediction"])
