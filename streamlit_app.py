@@ -19,6 +19,34 @@ def load_data():
 
 df = load_data()
 
+from sklearn.base import BaseEstimator, TransformerMixin
+
+# === HighCardinalityDropper ===
+class HighCardinalityDropper(BaseEstimator, TransformerMixin):
+    def __init__(self, threshold=100):
+        self.threshold = threshold
+        self.columns_to_drop_ = []
+
+    def fit(self, X, y=None):
+        cat_cols = X.select_dtypes(include=['object', 'category']).columns
+        self.columns_to_drop_ = [col for col in cat_cols if X[col].nunique() > self.threshold]
+        return self
+
+    def transform(self, X):
+        return X.drop(columns=self.columns_to_drop_, errors='ignore')
+
+# === ColumnDropper ===
+class ColumnDropper(BaseEstimator, TransformerMixin):
+    def __init__(self, cols_to_drop):
+        self.cols_to_drop = cols_to_drop
+
+    def fit(self, X, y=None):
+        return self
+
+    def transform(self, X):
+        return X.drop(columns=self.cols_to_drop, errors='ignore')
+
+
 # --- Load Pipeline ---
 preprocessing_pipeline = joblib.load("preprocessing_pipeline.pkl")
 
