@@ -234,6 +234,8 @@ with tab1:
             # Show preview
             st.markdown("### 🔍 Nearest DC Assigned to Each User")
             st.dataframe(simulated_df)
+
+            st.dataframe(simulated_processed)
             
 
 # --- TAB 2: Delivery Time Improvement Prediction ---
