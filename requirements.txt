@@ -2,3 +2,4 @@ streamlit
 pandas
 plotly
 joblib
+sckit-learn = 1.6.1
