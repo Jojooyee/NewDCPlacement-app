@@ -23,6 +23,9 @@ df = load_data()
 # --- Load Pipeline ---
 preprocessing_pipeline = joblib.load("preprocessing_pipeline.pkl")
 
+# --- Load trained prediction model ---
+model = joblib.load("best_random_forest_model.pkl")
+
 # --- Create Tabs Instead of Sidebar Navigation ---
 tab1, tab2 = st.tabs(["New DC Placement", "Delivery Time Improvement Prediction"])
 
@@ -230,9 +233,6 @@ with tab1:
             simulated_df["delivery_time_improvement"] = simulated_df["delivery_time_hour"] - simulated_df["estimated_new_delivery_time"]
 
             simulated_processed = preprocessing_pipeline.transform(simulated_df)
-
-            # --- Load trained prediction model ---
-            model = joblib.load("delivery_improvement_model.pkl")
 
             # --- Make prediction (binary classification: 1 = improvement, 0 = no improvement) ---
             predictions = model.predict(simulated_processed)
