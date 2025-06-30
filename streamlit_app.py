@@ -31,6 +31,8 @@ def load_data():
         st.error("❌ Failed to load data. Please check if the CSV format is valid.")
         st.stop()
 
+df = load_data()
+
 # --- Load Pipeline ---
 preprocessing_pipeline = joblib.load("preprocessing_pipeline.pkl")
 
