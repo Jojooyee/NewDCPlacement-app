@@ -88,6 +88,28 @@ with tab1:
         fig_map.update_traces(marker=dict(size=10, opacity=1.0))
         st.plotly_chart(fig_map, use_container_width=True)
 
+        predictions = model.predict(df)
+        prediction_probs = model.predict_proba(simulated_processed)[:, 1]  # Probabilities for class 1
+
+        # --- Append predictions to DataFrame ---
+        df["delivery_time_improvement_pred"] = predictions
+        df["improvement_probability"] = prediction_probs
+
+        st.markdown("### Prediction Summary")
+        improve_count = (df["delivery_time_improvement_pred"] == 1).sum()
+        no_improve_count = (df["delivery_time_improvement_pred"] == 0).sum()
+            
+        st.write(f"**Users with Improved Delivery**: {improve_count}")
+        st.write(f"**Users with No Improvement**: {no_improve_count}")
+            
+        # Optional: Pie chart
+        fig_pie = px.pie(
+            names=["Improved", "No Improvement"],
+            values=[improve_count, no_improve_count],
+            title="Delivery Improvement Prediction Results"
+        )
+        st.plotly_chart(fig_pie, use_container_width=True)
+
     elif result_option == "Clustering Report":
         # Section 1: Order volume & Avg delivery time
         st.markdown("### State-Level Summary")
