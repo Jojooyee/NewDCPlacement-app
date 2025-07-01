@@ -308,4 +308,7 @@ with tab2:
         )
         st.plotly_chart(fig_pie, use_container_width=True)
 
+        st.markdown("### 📋 Simulated Results Table")
+        st.dataframe(simulated_df)
+
         st.success("Prediction completed. Results shown above.")
