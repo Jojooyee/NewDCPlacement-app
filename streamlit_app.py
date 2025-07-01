@@ -229,7 +229,7 @@ with tab2:
                 lat="lat",
                 lon="lon",
                 hover_name="dc_id",
-                zoom=4,
+                zoom=2,
                 height=400
             )
             fig_user_dc.update_layout(mapbox_style="open-street-map")
