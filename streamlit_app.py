@@ -88,16 +88,18 @@ with tab1:
         fig_map.update_traces(marker=dict(size=10, opacity=1.0))
         st.plotly_chart(fig_map, use_container_width=True)
 
-        predictions = model.predict(df)
-        prediction_probs = model.predict_proba(simulated_processed)[:, 1]  # Probabilities for class 1
+        model_df = preprocessing_pipeline.transform(df)
+
+        predictions = model.predict(model_df)
+        prediction_probs = model.predict_proba(model_df)[:, 1]  # Probabilities for class 1
 
         # --- Append predictions to DataFrame ---
-        df["delivery_time_improvement_pred"] = predictions
-        df["improvement_probability"] = prediction_probs
+        model_df["delivery_time_improvement_pred"] = predictions
+        model_df["improvement_probability"] = prediction_probs
 
         st.markdown("### Prediction Summary")
-        improve_count = (df["delivery_time_improvement_pred"] == 1).sum()
-        no_improve_count = (df["delivery_time_improvement_pred"] == 0).sum()
+        improve_count = (model_df["delivery_time_improvement_pred"] == 1).sum()
+        no_improve_count = (model_df["delivery_time_improvement_pred"] == 0).sum()
             
         st.write(f"**Users with Improved Delivery**: {improve_count}")
         st.write(f"**Users with No Improvement**: {no_improve_count}")
