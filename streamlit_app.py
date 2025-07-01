@@ -10,14 +10,22 @@ st.set_page_config(page_title="DC Placement App", layout="wide")
 st.title("Distribution Center Suggestion Dashboard")
 
 # --- Load Data ---
-@st.cache_data
+# @st.cache_data
+# def load_data():
+#     # Replace with your actual file ID
+#     file_id = "1i8MgGX0xBguihN8SzMQwoQZ3p1jJ3Pgo"
+#     url = f"https://drive.google.com/uc?id={file_id}"
+#     df = pd.read_csv(url)
+#     return df
+
+# df = load_data()
+
 def load_data():
-    # Replace with your actual file ID
-    file_id = "1i8MgGX0xBguihN8SzMQwoQZ3p1jJ3Pgo"
-    url = f"https://drive.google.com/uc?id={file_id}"
+    # Replace with your actual GitHub raw URL
+    url = "https://raw.githubusercontent.com/Jojooyee/NewDCPlacement-app/main/test_df.csv"
     df = pd.read_csv(url)
     return df
-
+    
 df = load_data()
 
 # # --- Upload Dataset ---
