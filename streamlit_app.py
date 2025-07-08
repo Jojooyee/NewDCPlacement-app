@@ -107,7 +107,7 @@ with tab1:
         st.markdown("### 🤖 AI-Powered Recommendation")
         st.write("OpenAI version:", openai.__version__)
 
-        # Compose prompt
+        # Prompt message
         prompt = f"""
         You are a logistics analyst assistant.
         
@@ -119,10 +119,10 @@ with tab1:
         Consider factors such as cluster delivery efficiency, demand distribution, and delivery time reduction.
         """
         
-        # Call the chat completion endpoint using v1.x style
+        # Make request
         with st.spinner("Generating recommendation..."):
             try:
-                response = openai.chat.completions.create(
+                response = client.chat.completions.create(
                     model="gpt-4",
                     messages=[
                         {"role": "system", "content": "You are a helpful assistant who gives business and logistics insights."},
@@ -133,6 +133,7 @@ with tab1:
                 ai_output = response.choices[0].message.content
                 st.success("AI-generated Recommendation:")
                 st.markdown(ai_output)
+        
             except Exception as e:
                 st.error(f"Error generating recommendation: {e}")
 
