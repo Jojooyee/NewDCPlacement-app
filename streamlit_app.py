@@ -5,10 +5,9 @@ import numpy as np
 import joblib
 from preprocessing_utils import HighCardinalityDropper, ColumnDropper
 
-import openai
+from openai import OpenAI
 
-# Access key from secrets
-client = openai.OpenAI(api_key=st.secrets["openai"]["api_key"])
+client = OpenAI(api_key=st.secrets["openai"]["api_key"])
 
 # --- Page Setup ---
 st.set_page_config(page_title="DC Placement App", layout="wide")
@@ -105,9 +104,9 @@ with tab1:
 
         # --- Generate AI Recommendation ---
         st.markdown("### 🤖 AI-Powered Recommendation")
-        st.write("OpenAI version:", openai.__version__)
-
-        # Prompt message
+        st.markdown(f"OpenAI version: {openai.__version__}")
+        
+        # Compose prompt
         prompt = f"""
         You are a logistics analyst assistant.
         
@@ -119,7 +118,7 @@ with tab1:
         Consider factors such as cluster delivery efficiency, demand distribution, and delivery time reduction.
         """
         
-        # Make request
+        # Show loading spinner
         with st.spinner("Generating recommendation..."):
             try:
                 response = client.chat.completions.create(
@@ -133,7 +132,6 @@ with tab1:
                 ai_output = response.choices[0].message.content
                 st.success("AI-generated Recommendation:")
                 st.markdown(ai_output)
-        
             except Exception as e:
                 st.error(f"Error generating recommendation: {e}")
 
