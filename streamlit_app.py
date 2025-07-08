@@ -5,6 +5,12 @@ import numpy as np
 import joblib
 from preprocessing_utils import HighCardinalityDropper, ColumnDropper
 
+import openai
+from dotenv import load_dotenv
+import os
+
+openai.api_key = st.secrets["openai"]["api_key"]
+
 # --- Page Setup ---
 st.set_page_config(page_title="DC Placement App", layout="wide")
 st.title("Distribution Center Suggestion Dashboard")
@@ -97,6 +103,38 @@ with tab1:
             title="Delivery Improvement Prediction Results"
         )
         st.plotly_chart(fig_pie, use_container_width=True)
+
+    # --- Generate AI Recommendation ---
+    st.markdown("### 🤖 AI-Powered Recommendation")
+    
+    # Compose prompt
+    prompt = f"""
+    You are a logistics analyst assistant.
+    
+    Based on the following delivery improvement prediction:
+    - Users with improved delivery: {improve_count}
+    - Users with no improvement: {no_improve_count}
+    
+    Generate a brief explanation of why the suggested new DC locations are strategically beneficial.
+    Consider factors such as cluster delivery efficiency, demand distribution, and delivery time reduction.
+    """
+    
+    # Show loading spinner
+    with st.spinner("Generating recommendation..."):
+        try:
+            response = openai.ChatCompletion.create(
+                model="gpt-4",
+                messages=[
+                    {"role": "system", "content": "You are a helpful assistant who gives business and logistics insights."},
+                    {"role": "user", "content": prompt}
+                ],
+                temperature=0.7
+            )
+            ai_output = response["choices"][0]["message"]["content"]
+            st.success("AI-generated Recommendation:")
+            st.markdown(ai_output)
+        except Exception as e:
+            st.error(f"Error generating recommendation: {e}")
 
     elif result_option == "Clustering Report":
         # Section 1: Order volume & Avg delivery time
