@@ -121,7 +121,7 @@ with tab1:
         with st.spinner("Generating recommendation..."):
             try:
                 response = client.chat.completions.create(
-                    model="gpt-4",
+                    model="gpt-3.5-turbo",
                     messages=[
                         {"role": "system", "content": "You are a helpful assistant who gives business and logistics insights."},
                         {"role": "user", "content": prompt}
