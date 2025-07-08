@@ -5,9 +5,30 @@ import numpy as np
 import joblib
 from preprocessing_utils import HighCardinalityDropper, ColumnDropper
 
-from openai import OpenAI
+import requests
 
-client = OpenAI(api_key=st.secrets["openai"]["api_key"])
+# Load Together AI key from secrets
+TOGETHER_API_KEY = st.secrets["togetherai"]["api_key"]
+
+def generate_llama_response(prompt):
+    url = "https://api.together.xyz/v1/chat/completions"
+    headers = {
+        "Authorization": f"Bearer {TOGETHER_API_KEY}",
+        "Content-Type": "application/json"
+    }
+    payload = {
+        "model": "meta-llama/Llama-3-8b-chat-hf",
+        "messages": [
+            {"role": "system", "content": "You are a logistics expert assistant."},
+            {"role": "user", "content": prompt}
+        ],
+        "temperature": 0.7,
+        "max_tokens": 512
+    }
+    response = requests.post(url, json=payload, headers=headers)
+    result = response.json()
+
+    return result["choices"][0]["message"]["content"]
 
 # --- Page Setup ---
 st.set_page_config(page_title="DC Placement App", layout="wide")
@@ -102,38 +123,25 @@ with tab1:
         )
         st.plotly_chart(fig_pie, use_container_width=True)
 
-        # --- Generate AI Recommendation ---
+        # After prediction
         st.markdown("### 🤖 AI-Powered Recommendation")
         
-        # Compose prompt
         prompt = f"""
-        You are a logistics analyst assistant.
+        Based on delivery improvement prediction:
+        - Improved: {improve_count}
+        - Not Improved: {no_improve_count}
         
-        Based on the following delivery improvement prediction:
-        - Users with improved delivery: {improve_count}
-        - Users with no improvement: {no_improve_count}
-        
-        Generate a brief explanation of why the suggested new DC locations are strategically beneficial.
-        Consider factors such as cluster delivery efficiency, demand distribution, and delivery time reduction.
+        Explain why the suggested new DC locations are effective and what logistics reasoning supports it.
         """
         
-        # Show loading spinner
-        with st.spinner("Generating recommendation..."):
+        with st.spinner("Generating AI recommendation..."):
             try:
-                response = client.chat.completions.create(
-                    model="gpt-3.5-turbo",
-                    messages=[
-                        {"role": "system", "content": "You are a helpful assistant who gives business and logistics insights."},
-                        {"role": "user", "content": prompt}
-                    ],
-                    temperature=0.7
-                )
-                ai_output = response.choices[0].message.content
+                llama_output = generate_llama_response(prompt)
                 st.success("AI-generated Recommendation:")
-                st.markdown(ai_output)
+                st.markdown(llama_output)
             except Exception as e:
                 st.error(f"Error generating recommendation: {e}")
-
+                
     elif result_option == "Clustering Report":
         # Section 1: Order volume & Avg delivery time
         st.markdown("### State-Level Summary")
