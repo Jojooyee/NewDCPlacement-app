@@ -5,7 +5,7 @@ import numpy as np
 import joblib
 from preprocessing_utils import HighCardinalityDropper, ColumnDropper
 
-import openai
+from openai import OpenAI
 
 # Access the OpenAI API key securely from Streamlit secrets
 openai.api_key = st.secrets["openai"]["api_key"]
@@ -121,7 +121,9 @@ with tab1:
         # Show loading spinner
         with st.spinner("Generating recommendation..."):
             try:
-                response = openai.ChatCompletion.create(
+                client = openai.OpenAI(api_key=st.secrets["openai"]["api_key"])
+                
+                response = client.chat.completions.create(
                     model="gpt-4",
                     messages=[
                         {"role": "system", "content": "You are a helpful assistant who gives business and logistics insights."},
@@ -129,7 +131,8 @@ with tab1:
                     ],
                     temperature=0.7
                 )
-                ai_output = response["choices"][0]["message"]["content"]
+                
+                ai_output = response.choices[0].message.content
                 st.success("AI-generated Recommendation:")
                 st.markdown(ai_output)
             except Exception as e:
