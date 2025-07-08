@@ -105,7 +105,8 @@ with tab1:
 
         # --- Generate AI Recommendation ---
         st.markdown("### 🤖 AI-Powered Recommendation")
-        
+        st.write("OpenAI version:", openai.__version__)
+
         # Compose prompt
         prompt = f"""
         You are a logistics analyst assistant.
