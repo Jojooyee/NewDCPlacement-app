@@ -104,7 +104,6 @@ with tab1:
 
         # --- Generate AI Recommendation ---
         st.markdown("### 🤖 AI-Powered Recommendation")
-        st.markdown(f"OpenAI version: {openai.__version__}")
         
         # Compose prompt
         prompt = f"""
