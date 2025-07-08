@@ -3,4 +3,5 @@ pandas
 plotly
 joblib
 scikit-learn==1.6.1
-openai
+openai==0.28
+
