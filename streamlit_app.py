@@ -7,8 +7,8 @@ from preprocessing_utils import HighCardinalityDropper, ColumnDropper
 
 import openai
 
-# Set the API key from Streamlit secrets
-openai.api_key = st.secrets["openai"]["api_key"]
+# Access key from secrets
+client = openai.OpenAI(api_key=st.secrets["openai"]["api_key"])
 
 # --- Page Setup ---
 st.set_page_config(page_title="DC Placement App", layout="wide")
