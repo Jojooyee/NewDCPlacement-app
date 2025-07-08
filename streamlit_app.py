@@ -6,9 +6,8 @@ import joblib
 from preprocessing_utils import HighCardinalityDropper, ColumnDropper
 
 import openai
-from dotenv import load_dotenv
-import os
 
+# Access the OpenAI API key securely from Streamlit secrets
 openai.api_key = st.secrets["openai"]["api_key"]
 
 # --- Page Setup ---
