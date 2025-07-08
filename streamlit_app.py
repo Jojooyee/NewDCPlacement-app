@@ -119,7 +119,7 @@ with tab1:
         Consider factors such as cluster delivery efficiency, demand distribution, and delivery time reduction.
         """
         
-        # Show loading spinner
+        # Call the chat completion endpoint using v1.x style
         with st.spinner("Generating recommendation..."):
             try:
                 response = openai.chat.completions.create(
