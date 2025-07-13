@@ -99,6 +99,7 @@ with tab1:
 
     if result_option == "New DC Location":
         # Section 1: List of new dc location
+        st.divider()
         st.markdown("### Suggested New DC Coordinates")
         st.markdown("The list below shows the location of new dc by cluster.")
 
@@ -136,6 +137,7 @@ with tab1:
         df["delivery_time_improvement_pred"] = predictions
         df["improvement_probability"] = prediction_probs
 
+        st.divider()
         st.markdown("### Prediction Summary")
         improve_count = (df["delivery_time_improvement_pred"] == 1).sum()
         no_improve_count = (df["delivery_time_improvement_pred"] == 0).sum()
@@ -152,10 +154,12 @@ with tab1:
         st.plotly_chart(fig_pie, use_container_width=True)
 
         # AI Recommendation
+        st.divider()
         show_ai_recommendation(improve_count, no_improve_count)
                 
     elif result_option == "Clustering Report":
         # Section 1: Order volume & Avg delivery time
+        st.divider()
         st.markdown("### State-Level Summary")
         st.markdown("Below are the visualizations of order volume and average delivery time by state from the clustered dataset.")
 
@@ -192,6 +196,7 @@ with tab1:
         st.plotly_chart(fig_delivery, use_container_width=True)
 
         # Section 2: Cluster map
+        st.divider()
         st.markdown("### Cluster Map")
         st.markdown("The map below shows the location of each state, colored by assigned cluster.")
 
@@ -210,6 +215,7 @@ with tab1:
         st.plotly_chart(fig_map, use_container_width=True)
 
         # Section 3: Cluster demand ranking
+        st.divider()
         st.markdown("### Demand Ranking")
         st.markdown("Clusters are ranked based on their total composite weight (indicating demand concentration).")
         df["cluster"] = df["cluster"].astype(str)
