@@ -18,10 +18,17 @@ def generate_comparison_pdf_matplotlib(
 ):
     # Create pie charts with matplotlib
     def create_pie_chart(labels, values, title):
+        from io import BytesIO
+        import matplotlib.pyplot as plt
+    
+        # Define soft pastel colors (match bar chart)
+        colors = ['#A3D5A3', '#F7B7A3']  # [Improved, No Improvement]
+    
         fig, ax = plt.subplots()
-        ax.pie(values, labels=labels, autopct='%1.1f%%', startangle=90)
+        ax.pie(values, labels=labels, autopct='%1.1f%%', startangle=90, colors=colors)
         ax.axis('equal')
         ax.set_title(title)
+    
         buf = BytesIO()
         plt.savefig(buf, format='png')
         buf.seek(0)
@@ -47,9 +54,13 @@ def generate_comparison_pdf_matplotlib(
     
         fig, ax = plt.subplots()
     
-        # Plot bars for each outcome
-        bar1 = ax.bar(x - bar_width / 2, [values[m][0] for m in methods], bar_width, label='Improved', color='green')
-        bar2 = ax.bar(x + bar_width / 2, [values[m][1] for m in methods], bar_width, label='No Improvement', color='red')
+        # Use softer, pastel-style colors
+        improved_color = '#A3D5A3'         # soft green
+        no_improve_color = '#F7B7A3'       # soft red/pink
+    
+        # Clustered bars
+        bar1 = ax.bar(x - bar_width / 2, [values[m][0] for m in methods], bar_width, label='Improved', color=improved_color)
+        bar2 = ax.bar(x + bar_width / 2, [values[m][1] for m in methods], bar_width, label='No Improvement', color=no_improve_color)
     
         ax.set_xlabel('Method')
         ax.set_ylabel('User Count')
@@ -58,13 +69,13 @@ def generate_comparison_pdf_matplotlib(
         ax.set_xticklabels(methods)
         ax.legend()
     
+        # Layout & save to buffer
         buf = BytesIO()
         plt.tight_layout()
         plt.savefig(buf, format='png')
         buf.seek(0)
         plt.close()
         return buf
-
 
     pie1 = create_pie_chart(["Improved", "No Improvement"], [cluster_improve, cluster_no_improve], "Cluster-based DCs")
     pie2 = create_pie_chart(["Improved", "No Improvement"], [manual_improve, manual_no_improve], "Manual DCs")
