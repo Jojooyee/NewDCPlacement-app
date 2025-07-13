@@ -336,10 +336,29 @@ with tab2:
         )
         st.plotly_chart(fig_pie, use_container_width=True)
 
-        st.markdown("### Simulated Results Table")
-        st.dataframe(simulated_df)
+        # --- AI-Powered Recommendation for Manual DC Location ---
+        st.markdown("### AI-Powered Recommendation (Manual DC)")
+        
+        manual_prompt = f"""
+        You are a logistics expert.
+        
+        The user has manually proposed new DC (Distribution Center) locations.
+        Prediction results based on these inputs show:
+        - Improved delivery cases: {improve_count}
+        - No improvement cases: {no_improve_count}
+        
+        Generate a short logistics insight explaining whether the proposed DCs are strategically placed. 
+        Explain possible reasons for their effectiveness or shortcomings.
+        """
+        
+        with st.spinner("Generating AI recommendation..."):
+            try:
+                llama_output_manual = generate_llama_response(manual_prompt)
+                st.success("AI-generated Recommendation:")
+                st.markdown(llama_output_manual)
+            except Exception as e:
+                st.error(f"Error generating recommendation: {e}")
 
-        st.success("Prediction completed. Results shown above.")
 
 # --- TAB 3: Comparison Summary ---
 with tab3:
