@@ -9,74 +9,43 @@ import requests
 from fpdf import FPDF
 from io import BytesIO
 
-def generate_comparison_pdf(
-    cluster_improve, cluster_no_improve,
-    manual_improve, manual_no_improve,
-    cluster_dc_coords, manual_dc_coords,
-    ai_recommendation_text
-):
+def generate_comparison_pdf(cluster_improve, cluster_no_improve, manual_improve, manual_no_improve):
     pdf = FPDF()
     pdf.add_page()
-    pdf.set_font("Arial", "B", 14)
+    pdf.set_font("Arial", size=12)
+
+    # Title
     pdf.cell(200, 10, txt="DC Placement Comparison Report", ln=True, align="C")
     pdf.ln(10)
 
-    # --- Section 1: Cluster-based DC Coordinates ---
-    pdf.set_font("Arial", "B", 12)
-    pdf.cell(200, 10, txt="Cluster-based DC Coordinates", ln=True)
-    pdf.set_font("Arial", size=11)
-    for cluster, coords in cluster_dc_coords.items():
-        pdf.cell(200, 8, txt=f"Cluster {cluster}: Latitude {coords[0]:.4f}, Longitude {coords[1]:.4f}", ln=True)
-    pdf.ln(5)
-
-    # --- Section 2: Manual DC Coordinates ---
-    pdf.set_font("Arial", "B", 12)
-    pdf.cell(200, 10, txt="Manual DC Coordinates", ln=True)
-    pdf.set_font("Arial", size=11)
-    for i, (lat, lon) in enumerate(manual_dc_coords):
-        pdf.cell(200, 8, txt=f"Manual DC {i + 1}: Latitude {lat:.4f}, Longitude {lon:.4f}", ln=True)
-    pdf.ln(10)
-
-    # --- Section 3: Prediction Summary ---
+    # Cluster-based Summary
     cluster_total = cluster_improve + cluster_no_improve
-    manual_total = manual_improve + manual_no_improve
+    cluster_improve_pct = (cluster_improve / cluster_total) * 100
+    cluster_no_improve_pct = (cluster_no_improve / cluster_total) * 100
 
     pdf.set_font("Arial", "B", 12)
-    pdf.cell(200, 10, txt="Prediction Summary", ln=True)
-    pdf.set_font("Arial", size=11)
-
-    pdf.cell(200, 8, txt=f"Cluster-based Improved: {cluster_improve} ({(cluster_improve / cluster_total * 100):.1f}%)", ln=True)
-    pdf.cell(200, 8, txt=f"Cluster-based No Improvement: {cluster_no_improve} ({(cluster_no_improve / cluster_total * 100):.1f}%)", ln=True)
-    pdf.ln(5)
-    pdf.cell(200, 8, txt=f"Manual Improved: {manual_improve} ({(manual_improve / manual_total * 100):.1f}%)", ln=True)
-    pdf.cell(200, 8, txt=f"Manual No Improvement: {manual_no_improve} ({(manual_no_improve / manual_total * 100):.1f}%)", ln=True)
+    pdf.cell(200, 10, txt="Cluster-based DC Results", ln=True)
+    pdf.set_font("Arial", size=12)
+    pdf.cell(200, 10, txt=f"Improved: {cluster_improve} ({cluster_improve_pct:.1f}%)", ln=True)
+    pdf.cell(200, 10, txt=f"No Improvement: {cluster_no_improve} ({cluster_no_improve_pct:.1f}%)", ln=True)
     pdf.ln(10)
 
-    # --- Section 4: AI Recommendation ---
-    pdf.set_font("Arial", "B", 12)
-    pdf.cell(200, 10, txt="AI-Generated Recommendation", ln=True)
-    pdf.set_font("Arial", size=11)
-    
-    # Wrap long lines
-    import textwrap
-    wrapped_text = textwrap.fill(ai_recommendation_text, width=90)
-    for line in wrapped_text.split("\n"):
-        pdf.multi_cell(0, 8, txt=line)
-    pdf.ln(5)
+    # Manual Summary
+    manual_total = manual_improve + manual_no_improve
+    manual_improve_pct = (manual_improve / manual_total) * 100
+    manual_no_improve_pct = (manual_no_improve / manual_total) * 100
 
-    # Return BytesIO
+    pdf.set_font("Arial", "B", 12)
+    pdf.cell(200, 10, txt="Manual DC Results", ln=True)
+    pdf.set_font("Arial", size=12)
+    pdf.cell(200, 10, txt=f"Improved: {manual_improve} ({manual_improve_pct:.1f}%)", ln=True)
+    pdf.cell(200, 10, txt=f"No Improvement: {manual_no_improve} ({manual_no_improve_pct:.1f}%)", ln=True)
+
+    # Return buffer
     pdf_buffer = BytesIO()
     pdf.output(pdf_buffer)
     pdf_buffer.seek(0)
     return pdf_buffer
-
-# Load Data
-@st.cache_data
-def load_data():
-    # Replace with your actual GitHub raw URL
-    url = "https://raw.githubusercontent.com/Jojooyee/NewDCPlacement-app/main/test_df.csv"
-    df = pd.read_csv(url)
-    return df
     
 df = load_data()
 
@@ -482,30 +451,15 @@ with tab3:
         fig_bar = px.bar(compare_df, x="Method", y="Count", color="Outcome", barmode="group", title="Prediction Outcome Comparison")
         st.plotly_chart(fig_bar, use_container_width=True)
 
-        # Prepare data for PDF
-        cluster_dc_coords = {
-            row['cluster']: (row['new_dc_latitude'], row['new_dc_longitude'])
-            for _, row in unique_dc_locations.iterrows()
-        }
-        manual_dc_coords = new_dc_locations
-        ai_text = generate_llama_response(  # Or store llama_output from earlier
-            f"""Based on delivery improvement prediction:
-            - Improved: {manual_improve}
-            - Not Improved: {manual_no_improve}
+        # --- Download Button for PDF ---
+        st.divider()
+        st.subheader("Download Comparison Report")
         
-            Give short explanation on why the manual proposed DC locations are effective and what logistics reasoning supports it."""
-        )
-        
-        pdf_file = generate_comparison_pdf(
-            cluster_improve, cluster_no_improve,
-            manual_improve, manual_no_improve,
-            cluster_dc_coords, manual_dc_coords,
-            ai_text
-        )
+        pdf_file = generate_comparison_pdf(cluster_improve, cluster_no_improve, manual_improve, manual_no_improve)
         
         st.download_button(
-            label="📄 Download Comparison Report (PDF)",
+            label="📄 Download PDF Report",
             data=pdf_file,
-            file_name="dc_comparison_report.pdf",
+            file_name="DC_Comparison_Report.pdf",
             mime="application/pdf"
         )
