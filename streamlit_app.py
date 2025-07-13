@@ -167,7 +167,7 @@ def generate_comparison_pdf_matplotlib(cluster_improve, cluster_no_improve, manu
     pdf.set_font("Times", 'B', 12)
     pdf.cell(95, 10, txt="Cluster-based DC Results", ln=0)
     pdf.cell(95, 10, txt="Manual DC Results", ln=1)
-    pdf.set_font("Arial", '', 12)
+    pdf.set_font("Times", '', 12)
     pdf.cell(95, 8, txt=f"Improved: {cluster_improve} ({(cluster_improve / cluster_total)*100:.1f}%)", ln=0)
     pdf.cell(95, 8, txt=f"Improved: {manual_improve} ({(manual_improve / manual_total)*100:.1f}%)", ln=1)
     pdf.cell(95, 8, txt=f"No Improvement: {cluster_no_improve} ({(cluster_no_improve / cluster_total)*100:.1f}%)", ln=0)
