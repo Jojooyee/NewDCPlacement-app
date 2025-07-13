@@ -93,36 +93,37 @@ def generate_comparison_pdf():
     pdf.cell(200, 10, "DC Placement Comparison Report", ln=True, align='C')
     pdf.ln(10)
 
-    # Text Summary
+    # Summary Text
     pdf.set_font("Arial", size=12)
     pdf.multi_cell(0, 10, f"""
-        Cluster-based DCs:
-        - Improved: {cluster_improve} ({(cluster_improve / cluster_total * 100):.1f}%)
-        - No Improvement: {cluster_no_improve} ({(cluster_no_improve / cluster_total * 100):.1f}%)
-        
-        Manual DCs:
-        - Improved: {manual_improve} ({(manual_improve / manual_total * 100):.1f}%)
-        - No Improvement: {manual_no_improve} ({(manual_no_improve / manual_total * 100):.1f}%)
-            """)
+Cluster-based DCs:
+- Improved: {cluster_improve} ({(cluster_improve / cluster_total * 100):.1f}%)
+- No Improvement: {cluster_no_improve} ({(cluster_no_improve / cluster_total * 100):.1f}%)
 
-    # Export and attach Plotly charts
-    for fig, label in [
-        (fig1, "cluster_pie.png"),
-        (fig2, "manual_pie.png"),
-        (fig_bar, "bar_chart.png")
-    ]:
+Manual DCs:
+- Improved: {manual_improve} ({(manual_improve / manual_total * 100):.1f}%)
+- No Improvement: {manual_no_improve} ({(manual_no_improve / manual_total * 100):.1f}%)
+    """)
+    pdf.ln(5)
+
+    # Attach charts
+    for fig in [fig1, fig2, fig_bar]:
         img_bytes = pio.to_image(fig, format="png")
-        img_path = f"/tmp/{label}"
-        with open(img_path, "wb") as f:
-            f.write(img_bytes)
-        pdf.image(img_path, w=180)
+        img_io = BytesIO(img_bytes)
+        img_io.seek(0)
+        # Save image to temp file because FPDF needs a path
+        temp_path = "/tmp/temp_chart.png"
+        with open(temp_path, "wb") as f:
+            f.write(img_io.read())
+        pdf.image(temp_path, w=180)
         pdf.ln(5)
 
-    # Output to buffer
+    # Return PDF as BytesIO
     pdf_buffer = BytesIO()
     pdf.output(pdf_buffer)
     pdf_buffer.seek(0)
     return pdf_buffer
+
 
 
 # --- Page Setup ---
@@ -467,10 +468,14 @@ with tab3:
         st.plotly_chart(fig_bar, use_container_width=True)
 
         st.divider()
-        st.subheader("📥 Download Summary Report")
+        # Generate PDF buffer
+        pdf_data = generate_comparison_pdf()
         
-        if st.button("Generate & Download PDF Report"):
-            pdf_data = generate_comparison_pdf()
-            b64_pdf = base64.b64encode(pdf_data.read()).decode('utf-8')
-            href = f'<a href="data:application/pdf;base64,{b64_pdf}" download="dc_comparison_report.pdf">📄 Click here to download your PDF report</a>'
-            st.markdown(href, unsafe_allow_html=True)
+        # Show download button
+        st.download_button(
+            label="📄 Download PDF Report",
+            data=pdf_data,
+            file_name="dc_comparison_report.pdf",
+            mime="application/pdf"
+        )
+
