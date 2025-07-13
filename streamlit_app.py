@@ -6,9 +6,10 @@ import joblib
 from preprocessing_utils import HighCardinalityDropper, ColumnDropper
 import requests
 
-import matplotlib.pyplot as plt
 from fpdf import FPDF
 from io import BytesIO
+import matplotlib.pyplot as plt
+import numpy as np
 
 def generate_comparison_pdf_matplotlib(
     cluster_improve, cluster_no_improve,
@@ -16,60 +17,40 @@ def generate_comparison_pdf_matplotlib(
     unique_dc_locations,
     manual_dc_locations
 ):
-    # Create pie charts with matplotlib
+    # --- Pie Chart ---
     def create_pie_chart(labels, values, title):
-        from io import BytesIO
-        import matplotlib.pyplot as plt
-    
-        # Define soft pastel colors (match bar chart)
-        colors = ['#A3D5A3', '#F7B7A3']  # [Improved, No Improvement]
-    
+        colors = ['#A3D5A3', '#F7B7A3']
         fig, ax = plt.subplots()
         ax.pie(values, labels=labels, autopct='%1.1f%%', startangle=90, colors=colors)
         ax.axis('equal')
         ax.set_title(title)
-    
         buf = BytesIO()
         plt.savefig(buf, format='png')
         buf.seek(0)
         plt.close()
         return buf
 
+    # --- Bar Chart ---
     def create_bar_chart():
-        import numpy as np
-        import matplotlib.pyplot as plt
-        from io import BytesIO
-    
         methods = ['Cluster-based', 'Manual']
-        outcomes = ['Improved', 'No Improvement']
-    
-        # Data values
         values = {
             'Cluster-based': [cluster_improve, cluster_no_improve],
             'Manual': [manual_improve, manual_no_improve]
         }
-    
         bar_width = 0.35
-        x = np.arange(len(methods))  # [0, 1]
-    
+        x = np.arange(len(methods))
+
         fig, ax = plt.subplots()
-    
-        # Use softer, pastel-style colors
-        improved_color = '#A3D5A3'         # soft green
-        no_improve_color = '#F7B7A3'       # soft red/pink
-    
-        # Clustered bars
-        bar1 = ax.bar(x - bar_width / 2, [values[m][0] for m in methods], bar_width, label='Improved', color=improved_color)
-        bar2 = ax.bar(x + bar_width / 2, [values[m][1] for m in methods], bar_width, label='No Improvement', color=no_improve_color)
-    
+        bar1 = ax.bar(x - bar_width / 2, [values[m][0] for m in methods], bar_width, label='Improved', color='#A3D5A3')
+        bar2 = ax.bar(x + bar_width / 2, [values[m][1] for m in methods], bar_width, label='No Improvement', color='#F7B7A3')
+
         ax.set_xlabel('Method')
         ax.set_ylabel('User Count')
         ax.set_title('Prediction Outcome Comparison')
         ax.set_xticks(x)
         ax.set_xticklabels(methods)
         ax.legend()
-    
-        # Layout & save to buffer
+
         buf = BytesIO()
         plt.tight_layout()
         plt.savefig(buf, format='png')
@@ -81,54 +62,70 @@ def generate_comparison_pdf_matplotlib(
     pie2 = create_pie_chart(["Improved", "No Improvement"], [manual_improve, manual_no_improve], "Manual DCs")
     bar = create_bar_chart()
 
-    # PDF creation
+    # --- PDF Creation ---
     pdf = FPDF()
     pdf.add_page()
-    pdf.set_font("Arial", size=12)
-    pdf.cell(200, 10, txt="DC Placement Comparison Report", ln=True, align="C")
+    pdf.set_font("Arial", 'B', 16)
+    pdf.cell(200, 10, txt="📦 DC Placement Comparison Report", ln=True, align="C")
+    pdf.set_font("Arial", '', 12)
+    pdf.cell(200, 10, txt="Generated Insights on Clustered vs Manual Distribution Centers", ln=True, align="C")
     pdf.ln(10)
 
-    # Add counts and percentages
     cluster_total = cluster_improve + cluster_no_improve
     manual_total = manual_improve + manual_no_improve
 
-    pdf.set_font("Arial", "B", 12)
-    pdf.cell(200, 10, txt="Cluster-based DC Results", ln=True)
-    pdf.set_font("Arial", size=12)
-    pdf.cell(200, 10, txt=f"Improved: {cluster_improve} ({(cluster_improve / cluster_total) * 100:.1f}%)", ln=True)
-    pdf.cell(200, 10, txt=f"No Improvement: {cluster_no_improve} ({(cluster_no_improve / cluster_total) * 100:.1f}%)", ln=True)
-    pdf.ln(5)
-
-    pdf.set_font("Arial", "B", 12)
-    pdf.cell(200, 10, txt="Manual DC Results", ln=True)
-    pdf.set_font("Arial", size=12)
-    pdf.cell(200, 10, txt=f"Improved: {manual_improve} ({(manual_improve / manual_total) * 100:.1f}%)", ln=True)
-    pdf.cell(200, 10, txt=f"No Improvement: {manual_no_improve} ({(manual_no_improve / manual_total) * 100:.1f}%)", ln=True)
+    # --- Numerical Summary: Two Columns ---
+    pdf.set_font("Arial", 'B', 12)
+    pdf.cell(95, 10, txt="Cluster-based DC Results", ln=0)
+    pdf.cell(95, 10, txt="Manual DC Results", ln=1)
+    pdf.set_font("Arial", '', 12)
+    pdf.cell(95, 8, txt=f"Improved: {cluster_improve} ({(cluster_improve / cluster_total)*100:.1f}%)", ln=0)
+    pdf.cell(95, 8, txt=f"Improved: {manual_improve} ({(manual_improve / manual_total)*100:.1f}%)", ln=1)
+    pdf.cell(95, 8, txt=f"No Improvement: {cluster_no_improve} ({(cluster_no_improve / cluster_total)*100:.1f}%)", ln=0)
+    pdf.cell(95, 8, txt=f"No Improvement: {manual_no_improve} ({(manual_no_improve / manual_total)*100:.1f}%)", ln=1)
     pdf.ln(10)
 
-    # Cluster-based DC Coordinates
-    pdf.set_font("Arial", "B", 12)
-    pdf.cell(200, 10, txt="Cluster-based DC Coordinates", ln=True)
-    pdf.set_font("Arial", size=12)
-    for _, row in unique_dc_locations.iterrows():
-        pdf.cell(200, 8, txt=f"- Cluster {row['cluster']}: Lat {row['new_dc_latitude']:.4f}, Lon {row['new_dc_longitude']:.4f}", ln=True)
+    # --- DC Coordinates ---
+    pdf.set_font("Arial", 'B', 12)
+    pdf.cell(95, 10, txt="Cluster-based DC Coordinates", ln=0)
+    pdf.cell(95, 10, txt="Manual DC Coordinates", ln=1)
+    pdf.set_font("Arial", '', 12)
+
+    max_rows = max(len(unique_dc_locations), len(manual_dc_locations))
+    for i in range(max_rows):
+        if i < len(unique_dc_locations):
+            row = unique_dc_locations.iloc[i]
+            cluster_coord = f"- Cluster {row['cluster']}: ({row['new_dc_latitude']:.4f}, {row['new_dc_longitude']:.4f})"
+        else:
+            cluster_coord = ""
+
+        if i < len(manual_dc_locations):
+            lat, lon = manual_dc_locations[i]
+            manual_coord = f"- Manual DC {i+1}: ({lat:.4f}, {lon:.4f})"
+        else:
+            manual_coord = ""
+
+        pdf.cell(95, 8, txt=cluster_coord, ln=0)
+        pdf.cell(95, 8, txt=manual_coord, ln=1)
     pdf.ln(5)
 
-    # Manual DC Coordinates
-    pdf.set_font("Arial", "B", 12)
-    pdf.cell(200, 10, txt="Manual DC Coordinates", ln=True)
-    pdf.set_font("Arial", size=12)
-    for i, (lat, lon) in enumerate(manual_dc_locations):
-        pdf.cell(200, 8, txt=f"- Manual DC {i+1}: Lat {lat:.4f}, Lon {lon:.4f}", ln=True)
-    pdf.ln(5)
+    # --- Pie Charts Side by Side ---
+    pdf.set_font("Arial", 'B', 12)
+    pdf.cell(200, 10, txt="Visual Comparison - Pie Charts", ln=True, align="C")
+    pdf.ln(3)
 
-    # Add charts
-    for chart in [pie1, pie2, bar]:
-        pdf.add_page()
-        tmp_img = BytesIO(chart.read())
-        pdf.image(tmp_img, x=10, y=30, w=180)
+    # Pie side by side layout
+    pdf.image(pie1, x=15, y=pdf.get_y(), w=85)
+    pdf.image(pie2, x=110, y=pdf.get_y(), w=85)
+    pdf.ln(90)
 
-    # Output
+    # --- Bar Chart ---
+    pdf.set_font("Arial", 'B', 12)
+    pdf.cell(200, 10, txt="Bar Chart Summary", ln=True, align="C")
+    pdf.image(bar, x=15, y=pdf.get_y(), w=180)
+    pdf.ln(85)
+
+    # --- Output ---
     pdf_output = BytesIO()
     pdf.output(pdf_output)
     pdf_output.seek(0)
