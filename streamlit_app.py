@@ -45,15 +45,7 @@ def generate_llama_response(prompt):
 
     return result["choices"][0]["message"]["content"]
 
-def show_ai_recommendation(improve_count, no_improve_count, context="suggested new DC locations"):
-    """
-    Display AI-generated recommendation based on improvement prediction summary.
-    
-    Parameters:
-    - improve_count: Number of users with improved delivery
-    - no_improve_count: Number of users with no improvement
-    - context: Brief description of what the prediction relates to
-    """
+def show_ai_recommendation(improve_count, no_improve_count, context="suggested clustered-based DC locations"):
     st.markdown("### AI-Generated Recommendation")
 
     prompt = f"""
@@ -160,7 +152,7 @@ with tab1:
         st.plotly_chart(fig_pie, use_container_width=True)
 
         # AI Recommendation
-        st.markdown("### AI-Generated Recommendation")
+        # st.markdown("### AI-Generated Recommendation")
         show_ai_recommendation(improve_count, no_improve_count)
         
         # prompt = f"""
@@ -361,7 +353,7 @@ with tab2:
         st.plotly_chart(fig_pie, use_container_width=True)
 
         # --- AI-Powered Recommendation for Manual DC Location ---
-        st.markdown("### AI-Powered Recommendation (Manual DC)")
+        # st.markdown("### AI-Powered Recommendation (Manual DC)")
         show_ai_recommendation(improve_count, no_improve_count, context="manual proposed DC locations")
         
         # manual_prompt = f"""
