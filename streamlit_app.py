@@ -6,12 +6,6 @@ import joblib
 from preprocessing_utils import HighCardinalityDropper, ColumnDropper
 import requests
 
-from fpdf import FPDF
-import plotly.io as pio
-from io import BytesIO
-import base64
-
-
 # Load Data
 @st.cache_data
 def load_data():
@@ -82,49 +76,6 @@ def haversine(lat1, lon1, lat2, lon2):
     c = 2 * np.arctan2(np.sqrt(a), np.sqrt(1 - a))
 
     return R * c
-
-def generate_comparison_pdf():
-    pdf = FPDF()
-    pdf.add_page()
-    pdf.set_font("Arial", size=12)
-
-    # Header
-    pdf.set_font("Arial", 'B', size=14)
-    pdf.cell(200, 10, "DC Placement Comparison Report", ln=True, align='C')
-    pdf.ln(10)
-
-    # Summary Text
-    pdf.set_font("Arial", size=12)
-    pdf.multi_cell(0, 10, f"""
-Cluster-based DCs:
-- Improved: {cluster_improve} ({(cluster_improve / cluster_total * 100):.1f}%)
-- No Improvement: {cluster_no_improve} ({(cluster_no_improve / cluster_total * 100):.1f}%)
-
-Manual DCs:
-- Improved: {manual_improve} ({(manual_improve / manual_total * 100):.1f}%)
-- No Improvement: {manual_no_improve} ({(manual_no_improve / manual_total * 100):.1f}%)
-    """)
-    pdf.ln(5)
-
-    # Attach charts
-    for fig in [fig1, fig2, fig_bar]:
-        img_bytes = pio.to_image(fig, format="png")
-        img_io = BytesIO(img_bytes)
-        img_io.seek(0)
-        # Save image to temp file because FPDF needs a path
-        temp_path = "/tmp/temp_chart.png"
-        with open(temp_path, "wb") as f:
-            f.write(img_io.read())
-        pdf.image(temp_path, w=180)
-        pdf.ln(5)
-
-    # Return PDF as BytesIO
-    pdf_buffer = BytesIO()
-    pdf.output(pdf_buffer)
-    pdf_buffer.seek(0)
-    return pdf_buffer
-
-
 
 # --- Page Setup ---
 st.set_page_config(page_title="DC Placement App", layout="wide")
@@ -467,15 +418,31 @@ with tab3:
         fig_bar = px.bar(compare_df, x="Method", y="Count", color="Outcome", barmode="group", title="Prediction Outcome Comparison")
         st.plotly_chart(fig_bar, use_container_width=True)
 
-        st.divider()
-        # Generate PDF buffer
-        pdf_data = generate_comparison_pdf()
-        
-        # Show download button
-        st.download_button(
-            label="📄 Download PDF Report",
-            data=pdf_data,
-            file_name="dc_comparison_report.pdf",
-            mime="application/pdf"
-        )
+    import streamlit as st
+    from fpdf import FPDF
+    from io import BytesIO
+    
+    def generate_sample_pdf():
+        pdf = FPDF()
+        pdf.add_page()
+        pdf.set_font("Arial", size=12)
+        pdf.cell(200, 10, txt="Hello, this is a test PDF!", ln=True, align='C')
+    
+        # Output PDF to BytesIO
+        pdf_buffer = BytesIO()
+        pdf.output(pdf_buffer)
+        pdf_buffer.seek(0)
+        return pdf_buffer
+    
+    st.title("PDF Download Test")
+    
+    pdf_file = generate_sample_pdf()
+    
+    st.download_button(
+        label="Download PDF",
+        data=pdf_file,
+        file_name="test_report.pdf",
+        mime="application/pdf"
+    )
+
 
