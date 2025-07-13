@@ -152,23 +152,7 @@ with tab1:
         st.plotly_chart(fig_pie, use_container_width=True)
 
         # AI Recommendation
-        # st.markdown("### AI-Generated Recommendation")
         show_ai_recommendation(improve_count, no_improve_count)
-        
-        # prompt = f"""
-        # Based on delivery improvement prediction:
-        # - Improved: {improve_count}
-        # - Not Improved: {no_improve_count}
-        # Explain why the suggested new DC locations are effective and what logistics reasoning supports it.
-        # """
-        
-        # with st.spinner("Generating AI recommendation..."):
-        #     try:
-        #         llama_output = generate_llama_response(prompt)
-        #         st.success("AI-generated Recommendation:")
-        #         st.markdown(llama_output)
-        #     except Exception as e:
-        #         st.error(f"Error generating recommendation: {e}")
                 
     elif result_option == "Clustering Report":
         # Section 1: Order volume & Avg delivery time
@@ -353,31 +337,9 @@ with tab2:
         st.plotly_chart(fig_pie, use_container_width=True)
 
         # --- AI-Powered Recommendation for Manual DC Location ---
-        # st.markdown("### AI-Powered Recommendation (Manual DC)")
         show_ai_recommendation(improve_count, no_improve_count, context="manual proposed DC locations")
-        
-        # manual_prompt = f"""
-        # You are a logistics expert.
-        
-        # The user has manually proposed new DC (Distribution Center) locations.
-        # Prediction results based on these inputs show:
-        # - Improved delivery cases: {improve_count}
-        # - No improvement cases: {no_improve_count}
-        
-        # Generate a short logistics insight explaining whether the proposed DCs are strategically placed. 
-        # Explain possible reasons for their effectiveness or shortcomings.
-        # """
-        
-        # with st.spinner("Generating AI recommendation..."):
-        #     try:
-        #         llama_output_manual = generate_llama_response(manual_prompt)
-        #         st.success("AI-generated Recommendation:")
-        #         st.markdown(llama_output_manual)
-        #     except Exception as e:
-        #         st.error(f"Error generating recommendation: {e}")
 
-
-# --- TAB 3: Comparison Summary ---
+# TAB 3: Comparison Summary
 with tab3:
     st.header("Comparison of Cluster-based vs Manual DC Placement")
 
