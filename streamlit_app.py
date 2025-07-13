@@ -52,6 +52,7 @@ model = joblib.load("delivery_improvement_model.pkl")
 
 # --- Create Tabs Instead of Sidebar Navigation ---
 tab1, tab2 = st.tabs(["Cluster-based DC Suggestion", "Manual Proposed DC Location"])
+tab1, tab2, tab3 = st.tabs(["Cluster-based DC Suggestion", "Manual Proposed DC Location","Comparison Summary"])
 
 # --- TAB 1: New DC Suggestion ---
 with tab1:
@@ -124,7 +125,7 @@ with tab1:
         st.plotly_chart(fig_pie, use_container_width=True)
 
         # After prediction
-        st.markdown("### 🤖 AI-Powered Recommendation")
+        st.markdown("### AI-Powered Recommendation")
         
         prompt = f"""
         Based on delivery improvement prediction:
