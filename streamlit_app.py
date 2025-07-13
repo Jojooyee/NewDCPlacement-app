@@ -364,6 +364,7 @@ with tab3:
         manual_improve = (simulated_df["delivery_time_improvement_pred"] == 1).sum()
         manual_no_improve = (simulated_df["delivery_time_improvement_pred"] == 0).sum()
 
+        st.divider()
         st.subheader("Numeric Comparison")
 
         # Totals for percentage calculations
@@ -379,6 +380,7 @@ with tab3:
             st.metric("Manual No Improvement", f"{manual_no_improve} ({(manual_no_improve / manual_total * 100):.1f}%)")
 
         # Pie Charts Side by Side
+        st.divider()
         st.subheader("Visual Comparison")
 
         col1, col2 = st.columns(2)
@@ -398,6 +400,7 @@ with tab3:
             st.plotly_chart(fig2, use_container_width=True)
 
         # Optional: Bar Chart Summary
+        st.divider()
         st.subheader("Bar Chart Comparison")
         compare_df = pd.DataFrame({
             "Method": ["Cluster-based", "Cluster-based", "Manual", "Manual"],
