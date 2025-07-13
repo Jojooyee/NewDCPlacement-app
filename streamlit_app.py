@@ -478,16 +478,30 @@ with tab3:
         fig_bar = px.bar(compare_df, x="Method", y="Count", color="Outcome", barmode="group", title="Prediction Outcome Comparison")
         st.plotly_chart(fig_bar, use_container_width=True)
 
-        # --- Download Button for PDF ---
-        st.divider()
-        st.subheader("Download Comparison Report")
+        # Prepare data for PDF
+        cluster_dc_coords = {
+            row['cluster']: (row['new_dc_latitude'], row['new_dc_longitude'])
+            for _, row in unique_dc_locations.iterrows()
+        }
+        manual_dc_coords = new_dc_locations
+        ai_text = generate_llama_response(  # Or store llama_output from earlier
+            f"""Based on delivery improvement prediction:
+            - Improved: {manual_improve}
+            - Not Improved: {manual_no_improve}
         
-        pdf_file = generate_comparison_pdf(cluster_improve, cluster_no_improve, manual_improve, manual_no_improve)
-
+            Give short explanation on why the manual proposed DC locations are effective and what logistics reasoning supports it."""
+        )
+        
+        pdf_file = generate_comparison_pdf(
+            cluster_improve, cluster_no_improve,
+            manual_improve, manual_no_improve,
+            cluster_dc_coords, manual_dc_coords,
+            ai_text
+        )
         
         st.download_button(
-            label="📄 Download PDF Report",
+            label="📄 Download Comparison Report (PDF)",
             data=pdf_file,
-            file_name="DC_Comparison_Report.pdf",
+            file_name="dc_comparison_report.pdf",
             mime="application/pdf"
         )
