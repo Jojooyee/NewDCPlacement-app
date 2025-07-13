@@ -20,7 +20,8 @@ def generate_comparison_pdf_matplotlib(
     # --- Pie Chart ---
     def create_pie_chart(labels, values, title):
         colors = ['#A3D5A3', '#F7B7A3']
-        fig, ax = plt.subplots()
+        # fig, ax = plt.subplots()
+        fig, ax = plt.subplots(figsize=(6, 6))
         ax.pie(values, labels=labels, autopct='%1.1f%%', startangle=90, colors=colors)
         ax.axis('equal')
         ax.set_title(title)
