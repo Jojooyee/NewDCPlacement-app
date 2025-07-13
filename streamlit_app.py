@@ -438,16 +438,16 @@ with tab3:
         fig_bar = px.bar(compare_df, x="Method", y="Count", color="Outcome", barmode="group", title="Prediction Outcome Comparison")
         st.plotly_chart(fig_bar, use_container_width=True)
 
-        # --- PDF Export Button ---
-        st.subheader("📄 Export Full Report as PDF")
-        if st.button("Generate PDF Report"):
-            with st.spinner("Generating report..."):
-                pdf_path = create_pdf_report(df, simulated_df, compare_df, fig1, fig2, fig_bar)
-                with open(pdf_path, "rb") as f:
-                    st.download_button(
-                        label="📥 Download Full Report PDF",
-                        data=f,
-                        file_name="dc_placement_report.pdf",
-                        mime="application/pdf"
-                    )
+    # --- PDF Export Button ---
+    st.subheader("📄 Export Full Report as PDF")
+    if st.button("Generate PDF Report"):
+        with st.spinner("Generating report..."):
+            pdf_path = create_pdf_report(df, simulated_df, compare_df, fig1, fig2, fig_bar)
+            with open(pdf_path, "rb") as f:
+                st.download_button(
+                    label="📥 Download Full Report PDF",
+                    data=f,
+                    file_name="dc_placement_report.pdf",
+                    mime="application/pdf"
+                )
 
