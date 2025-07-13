@@ -46,6 +46,14 @@ def generate_comparison_pdf(cluster_improve, cluster_no_improve, manual_improve,
     pdf.output(pdf_buffer)
     pdf_buffer.seek(0)
     return pdf_buffer
+
+# --- Load Data ---
+@st.cache_data
+def load_data():
+    # Replace with your actual GitHub raw URL
+    url = "https://raw.githubusercontent.com/Jojooyee/NewDCPlacement-app/main/test_df.csv"
+    df = pd.read_csv(url)
+    return df
     
 df = load_data()
 
