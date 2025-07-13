@@ -6,6 +6,53 @@ import joblib
 from preprocessing_utils import HighCardinalityDropper, ColumnDropper
 import requests
 
+from fpdf import FPDF
+import tempfile
+import os
+
+def create_pdf_report(df_cluster, df_manual, summary_df, cluster_pie, manual_pie, comparison_bar):
+    pdf = FPDF()
+    pdf.set_auto_page_break(auto=True, margin=15)
+    pdf.add_page()
+    pdf.set_font("Arial", "B", 16)
+    pdf.cell(0, 10, "DC Placement Prediction Report", ln=True, align='C')
+
+    # --- Cluster Summary ---
+    pdf.set_font("Arial", "B", 12)
+    pdf.ln(10)
+    pdf.cell(0, 10, "1. Cluster-Based Prediction Summary", ln=True)
+    pdf.set_font("Arial", "", 10)
+    pdf.cell(0, 10, f"Total Rows: {len(df_cluster)}", ln=True)
+    pdf.cell(0, 10, f"Improved: {(df_cluster['delivery_time_improvement_pred']==1).sum()}, No Improvement: {(df_cluster['delivery_time_improvement_pred']==0).sum()}", ln=True)
+
+    # --- Manual Summary ---
+    pdf.set_font("Arial", "B", 12)
+    pdf.ln(5)
+    pdf.cell(0, 10, "2. Manual DC Prediction Summary", ln=True)
+    pdf.set_font("Arial", "", 10)
+    pdf.cell(0, 10, f"Total Rows: {len(df_manual)}", ln=True)
+    pdf.cell(0, 10, f"Improved: {(df_manual['delivery_time_improvement_pred']==1).sum()}, No Improvement: {(df_manual['delivery_time_improvement_pred']==0).sum()}", ln=True)
+
+    # --- Add Charts ---
+    def save_and_add_chart(fig, filename, title):
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as tmpfile:
+            fig.write_image(tmpfile.name, width=700, height=400)
+            pdf.add_page()
+            pdf.set_font("Arial", "B", 12)
+            pdf.cell(0, 10, title, ln=True)
+            pdf.image(tmpfile.name, x=10, w=190)
+            os.unlink(tmpfile.name)
+
+    save_and_add_chart(cluster_pie, "cluster_pie.png", "Cluster-Based Prediction Chart")
+    save_and_add_chart(manual_pie, "manual_pie.png", "Manual DC Prediction Chart")
+    save_and_add_chart(comparison_bar, "comparison_bar.png", "Comparison Bar Chart")
+
+    # --- Save Final PDF ---
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmpfile:
+        pdf.output(tmpfile.name)
+        return tmpfile.name
+
+
 # Load Data
 @st.cache_data
 def load_data():
@@ -390,3 +437,17 @@ with tab3:
         })
         fig_bar = px.bar(compare_df, x="Method", y="Count", color="Outcome", barmode="group", title="Prediction Outcome Comparison")
         st.plotly_chart(fig_bar, use_container_width=True)
+
+        # --- PDF Export Button ---
+        st.subheader("📄 Export Full Report as PDF")
+        if st.button("Generate PDF Report"):
+            with st.spinner("Generating report..."):
+                pdf_path = create_pdf_report(df, simulated_df, compare_df, fig1, fig2, fig_bar)
+                with open(pdf_path, "rb") as f:
+                    st.download_button(
+                        label="📥 Download Full Report PDF",
+                        data=f,
+                        file_name="dc_placement_report.pdf",
+                        mime="application/pdf"
+                    )
+
