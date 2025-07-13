@@ -6,11 +6,16 @@ import joblib
 from preprocessing_utils import HighCardinalityDropper, ColumnDropper
 import requests
 
-from fpdf import FPDF
-from datetime import datetime
-import io
-def generate_summary_pdf(cluster_improve, cluster_no_improve, manual_improve, manual_no_improve):
+def generate_summary_pdf(cluster_improve, cluster_no_improve, manual_improve, manual_no_improve, fig1, fig2, fig_bar):
+    from fpdf import FPDF
+    from datetime import datetime
+    import io
+    from PIL import Image
+    import plotly.io as pio
+    import os
+
     pdf = FPDF()
+    pdf.set_auto_page_break(auto=True, margin=15)
     pdf.add_page()
     pdf.set_font("Arial", size=12)
 
@@ -30,13 +35,23 @@ def generate_summary_pdf(cluster_improve, cluster_no_improve, manual_improve, ma
     pdf.cell(200, 10, txt=f"- Improved Deliveries: {manual_improve}", ln=True)
     pdf.cell(200, 10, txt=f"- No Improvement: {manual_no_improve}", ln=True)
 
-    # Convert PDF to bytes
-    pdf_output = io.BytesIO()
-    pdf.output(pdf_output)
-    pdf_output.seek(0)
+    def add_plotly_fig_to_pdf(fig, title):
+        img_bytes = io.BytesIO()
+        fig.write_image(img_bytes, format="png")
+        img_bytes.seek(0)
+        image = Image.open(img_bytes)
+        image_path = f"{title}.png"
+        image.save(image_path)
+        pdf.add_page()
+        pdf.cell(200, 10, txt=title, ln=True, align="C")
+        pdf.image(image_path, x=10, y=30, w=180)
+        os.remove(image_path)
 
-    return pdf_output
+    add_plotly_fig_to_pdf(fig1, "Cluster-based DCs")
+    add_plotly_fig_to_pdf(fig2, "Manual DCs")
+    add_plotly_fig_to_pdf(fig_bar, "Prediction Outcome Comparison")
 
+    return pdf.output(dest='S').encode('latin1')  # Return PDF as bytes
 
 # Load Data
 @st.cache_data
@@ -425,12 +440,16 @@ with tab3:
 
         # PDF Export Section
         st.subheader("📄 Export Results")
-        if st.button("Download Summary as PDF"):
-            pdf_file = generate_summary_pdf(cluster_improve, cluster_no_improve, manual_improve, manual_no_improve)
-            st.download_button(
-                label="Click here to download",
-                data=pdf_file,
-                file_name="DC_placement_summary.pdf",
-                mime="application/pdf"
-            )
+        pdf_bytes = generate_summary_pdf(
+            cluster_improve, cluster_no_improve,
+            manual_improve, manual_no_improve,
+            fig1, fig2, fig_bar
+        )
+        st.download_button(
+            label="Click here to download PDF",
+            data=pdf_bytes,
+            file_name="dc_placement_summary.pdf",
+            mime="application/pdf"
+        )
+
 
