@@ -6,68 +6,77 @@ import joblib
 from preprocessing_utils import HighCardinalityDropper, ColumnDropper
 import requests
 
+import matplotlib.pyplot as plt
 from fpdf import FPDF
 from io import BytesIO
-import plotly.io as pio
-import tempfile
 
-def generate_comparison_pdf_with_charts(
+def generate_comparison_pdf_matplotlib(
     cluster_improve, cluster_no_improve,
     manual_improve, manual_no_improve,
     unique_dc_locations,
-    manual_dc_locations,
-    fig1, fig2, fig_bar
+    manual_dc_locations
 ):
-    # Convert Plotly figs to PNG bytes
-    img_bytes1 = pio.to_image(fig1, format="png", width=600, height=400, scale=2)
-    img_bytes2 = pio.to_image(fig2, format="png", width=600, height=400, scale=2)
-    img_bytes_bar = pio.to_image(fig_bar, format="png", width=600, height=400, scale=2)
+    # Create pie charts with matplotlib
+    def create_pie_chart(labels, values, title):
+        fig, ax = plt.subplots()
+        ax.pie(values, labels=labels, autopct='%1.1f%%', startangle=90)
+        ax.axis('equal')
+        ax.set_title(title)
+        buf = BytesIO()
+        plt.savefig(buf, format='png')
+        buf.seek(0)
+        plt.close()
+        return buf
 
-    # Save to temporary files for FPDF
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as f1, \
-         tempfile.NamedTemporaryFile(delete=False, suffix=".png") as f2, \
-         tempfile.NamedTemporaryFile(delete=False, suffix=".png") as f3:
-        f1.write(img_bytes1)
-        f2.write(img_bytes2)
-        f3.write(img_bytes_bar)
+    def create_bar_chart():
+        methods = ['Cluster', 'Cluster', 'Manual', 'Manual']
+        outcomes = ['Improved', 'No Improvement'] * 2
+        values = [cluster_improve, cluster_no_improve, manual_improve, manual_no_improve]
 
-        f1_path, f2_path, f3_path = f1.name, f2.name, f3.name
+        colors = ['green', 'red', 'green', 'red']
+        fig, ax = plt.subplots()
+        bars = ax.bar(methods, values, color=colors)
+        ax.set_title("Bar Chart Comparison")
+        buf = BytesIO()
+        plt.savefig(buf, format='png')
+        buf.seek(0)
+        plt.close()
+        return buf
 
+    pie1 = create_pie_chart(["Improved", "No Improvement"], [cluster_improve, cluster_no_improve], "Cluster-based DCs")
+    pie2 = create_pie_chart(["Improved", "No Improvement"], [manual_improve, manual_no_improve], "Manual DCs")
+    bar = create_bar_chart()
+
+    # PDF creation
     pdf = FPDF()
     pdf.add_page()
     pdf.set_font("Arial", size=12)
     pdf.cell(200, 10, txt="DC Placement Comparison Report", ln=True, align="C")
     pdf.ln(10)
 
-    # Cluster Results
+    # Add counts and percentages
     cluster_total = cluster_improve + cluster_no_improve
-    cluster_improve_pct = (cluster_improve / cluster_total) * 100
-    cluster_no_improve_pct = (cluster_no_improve / cluster_total) * 100
+    manual_total = manual_improve + manual_no_improve
 
     pdf.set_font("Arial", "B", 12)
     pdf.cell(200, 10, txt="Cluster-based DC Results", ln=True)
     pdf.set_font("Arial", size=12)
-    pdf.cell(200, 10, txt=f"Improved: {cluster_improve} ({cluster_improve_pct:.1f}%)", ln=True)
-    pdf.cell(200, 10, txt=f"No Improvement: {cluster_no_improve} ({cluster_no_improve_pct:.1f}%)", ln=True)
+    pdf.cell(200, 10, txt=f"Improved: {cluster_improve} ({(cluster_improve / cluster_total) * 100:.1f}%)", ln=True)
+    pdf.cell(200, 10, txt=f"No Improvement: {cluster_no_improve} ({(cluster_no_improve / cluster_total) * 100:.1f}%)", ln=True)
     pdf.ln(5)
-
-    # Manual Results
-    manual_total = manual_improve + manual_no_improve
-    manual_improve_pct = (manual_improve / manual_total) * 100
-    manual_no_improve_pct = (manual_no_improve / manual_total) * 100
 
     pdf.set_font("Arial", "B", 12)
     pdf.cell(200, 10, txt="Manual DC Results", ln=True)
     pdf.set_font("Arial", size=12)
-    pdf.cell(200, 10, txt=f"Improved: {manual_improve} ({manual_improve_pct:.1f}%)", ln=True)
-    pdf.cell(200, 10, txt=f"No Improvement: {manual_no_improve} ({manual_no_improve_pct:.1f}%)", ln=True)
+    pdf.cell(200, 10, txt=f"Improved: {manual_improve} ({(manual_improve / manual_total) * 100:.1f}%)", ln=True)
+    pdf.cell(200, 10, txt=f"No Improvement: {manual_no_improve} ({(manual_no_improve / manual_total) * 100:.1f}%)", ln=True)
     pdf.ln(10)
 
     # Cluster-based DC Coordinates
     pdf.set_font("Arial", "B", 12)
     pdf.cell(200, 10, txt="Cluster-based DC Coordinates", ln=True)
     pdf.set_font("Arial", size=12)
-    for idx, row in unique_dc_locations.iterrows():
+    for _, row in unique_dc_locations.iterrows():
         pdf.cell(200, 8, txt=f"- Cluster {row['cluster']}: Lat {row['new_dc_latitude']:.4f}, Lon {row['new_dc_longitude']:.4f}", ln=True)
     pdf.ln(5)
 
@@ -77,27 +86,19 @@ def generate_comparison_pdf_with_charts(
     pdf.set_font("Arial", size=12)
     for i, (lat, lon) in enumerate(manual_dc_locations):
         pdf.cell(200, 8, txt=f"- Manual DC {i+1}: Lat {lat:.4f}, Lon {lon:.4f}", ln=True)
-    pdf.ln(10)
-
-    # Add Pie Charts
-    pdf.add_page()
-    pdf.set_font("Arial", "B", 12)
-    pdf.cell(200, 10, txt="Pie Chart Comparison", ln=True)
-    pdf.image(f1_path, w=180)
     pdf.ln(5)
-    pdf.image(f2_path, w=180)
-    pdf.ln(10)
 
-    # Add Bar Chart
-    pdf.set_font("Arial", "B", 12)
-    pdf.cell(200, 10, txt="Bar Chart Comparison", ln=True)
-    pdf.image(f3_path, w=180)
+    # Add charts
+    for chart in [pie1, pie2, bar]:
+        pdf.add_page()
+        tmp_img = BytesIO(chart.read())
+        pdf.image(tmp_img, x=10, y=30, w=180)
 
-    # Return as BytesIO for download
-    pdf_buffer = BytesIO()
-    pdf.output(pdf_buffer)
-    pdf_buffer.seek(0)
-    return pdf_buffer
+    # Output
+    pdf_output = BytesIO()
+    pdf.output(pdf_output)
+    pdf_output.seek(0)
+    return pdf_output
 
 # --- Load Data ---
 @st.cache_data
@@ -515,18 +516,17 @@ with tab3:
         st.divider()
         st.subheader("Download Comparison Report")
         
-        # Generate PDF with charts
-        pdf_file = generate_comparison_pdf_with_charts(
+        pdf_file = generate_comparison_pdf_matplotlib(
             cluster_improve, cluster_no_improve,
             manual_improve, manual_no_improve,
-            unique_dc_locations, new_dc_locations,
-            fig1, fig2, fig_bar
+            unique_dc_locations, new_dc_locations
         )
         
         st.download_button(
-            label="📄 Download Full PDF Report (with Charts)",
+            label="📄 Download PDF Report (Safe Version)",
             data=pdf_file,
-            file_name="dc_comparison_full_report.pdf",
+            file_name="dc_comparison_report.pdf",
             mime="application/pdf"
         )
+
 
