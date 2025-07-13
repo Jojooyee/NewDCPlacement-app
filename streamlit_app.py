@@ -6,6 +6,37 @@ import joblib
 from preprocessing_utils import HighCardinalityDropper, ColumnDropper
 import requests
 
+from fpdf import FPDF
+from io import BytesIO
+import plotly.io as pio
+def generate_comparison_pdf(fig1, fig2, fig_bar):
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_font("Arial", size=12)
+    pdf.cell(200, 10, txt="Comparison of Cluster-based vs Manual DC Placement", ln=True)
+
+    # Add pie chart 1 (Cluster)
+    pdf.cell(200, 10, txt="Cluster-based DCs", ln=True)
+    img_bytes1 = pio.to_image(fig1, format="png", width=600, height=400, scale=2)
+    pdf.image(BytesIO(img_bytes1), x=10, y=None, w=180)
+
+    # Add pie chart 2 (Manual)
+    pdf.cell(200, 10, txt="Manual DCs", ln=True)
+    img_bytes2 = pio.to_image(fig2, format="png", width=600, height=400, scale=2)
+    pdf.image(BytesIO(img_bytes2), x=10, y=None, w=180)
+
+    # Add bar chart
+    pdf.cell(200, 10, txt="Bar Chart Comparison", ln=True)
+    img_bytes3 = pio.to_image(fig_bar, format="png", width=600, height=400, scale=2)
+    pdf.image(BytesIO(img_bytes3), x=10, y=None, w=180)
+
+    # Export as in-memory file
+    pdf_buffer = BytesIO()
+    pdf.output(pdf_buffer)
+    pdf_buffer.seek(0)
+    return pdf_buffer
+
+
 # Load Data
 @st.cache_data
 def load_data():
@@ -418,31 +449,15 @@ with tab3:
         fig_bar = px.bar(compare_df, x="Method", y="Count", color="Outcome", barmode="group", title="Prediction Outcome Comparison")
         st.plotly_chart(fig_bar, use_container_width=True)
 
-    import streamlit as st
-    from fpdf import FPDF
-    from io import BytesIO
-    
-    def generate_sample_pdf():
-        pdf = FPDF()
-        pdf.add_page()
-        pdf.set_font("Arial", size=12)
-        pdf.cell(200, 10, txt="Hello, this is a test PDF!", ln=True, align='C')
-    
-        # Output PDF to BytesIO
-        pdf_buffer = BytesIO()
-        pdf.output(pdf_buffer)
-        pdf_buffer.seek(0)
-        return pdf_buffer
-    
-    st.title("PDF Download Test")
-    
-    pdf_file = generate_sample_pdf()
-    
-    st.download_button(
-        label="Download PDF",
-        data=pdf_file,
-        file_name="test_report.pdf",
-        mime="application/pdf"
-    )
-
-
+        # --- Download Button for PDF ---
+        st.divider()
+        st.subheader("Download Comparison Report")
+        
+        pdf_file = generate_comparison_pdf(fig1, fig2, fig_bar)
+        
+        st.download_button(
+            label="📄 Download PDF Report",
+            data=pdf_file,
+            file_name="DC_Comparison_Report.pdf",
+            mime="application/pdf"
+        )
