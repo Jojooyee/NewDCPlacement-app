@@ -51,7 +51,6 @@ preprocessing_pipeline = joblib.load("preprocessing_pipeline.pkl")
 model = joblib.load("delivery_improvement_model.pkl")
 
 # --- Create Tabs Instead of Sidebar Navigation ---
-tab1, tab2 = st.tabs(["Cluster-based DC Suggestion", "Manual Proposed DC Location"])
 tab1, tab2, tab3 = st.tabs(["Cluster-based DC Suggestion", "Manual Proposed DC Location","Comparison Summary"])
 
 # --- TAB 1: New DC Suggestion ---
@@ -341,3 +340,56 @@ with tab2:
         st.dataframe(simulated_df)
 
         st.success("Prediction completed. Results shown above.")
+
+# --- TAB 3: Comparison Summary ---
+with tab3:
+    st.header("📊 Comparison of Cluster-based vs Manual DC Placement")
+
+    if "simulated_df" not in locals() or "df" not in locals():
+        st.warning("Please run predictions in both tabs first (Cluster-based and Manual) to view comparison.")
+    else:
+        # Get prediction counts
+        cluster_improve = (df["delivery_time_improvement_pred"] == 1).sum()
+        cluster_no_improve = (df["delivery_time_improvement_pred"] == 0).sum()
+
+        manual_improve = (simulated_df["delivery_time_improvement_pred"] == 1).sum()
+        manual_no_improve = (simulated_df["delivery_time_improvement_pred"] == 0).sum()
+
+        st.subheader("📌 Numeric Comparison")
+        col1, col2 = st.columns(2)
+        with col1:
+            st.metric("Cluster-based Improved", cluster_improve)
+            st.metric("Cluster-based No Improvement", cluster_no_improve)
+        with col2:
+            st.metric("Manual Improved", manual_improve)
+            st.metric("Manual No Improvement", manual_no_improve)
+
+        # Pie Charts Side by Side
+        st.subheader("🥧 Visual Comparison")
+
+        col1, col2 = st.columns(2)
+        with col1:
+            fig1 = px.pie(
+                names=["Improved", "No Improvement"],
+                values=[cluster_improve, cluster_no_improve],
+                title="Cluster-based DCs"
+            )
+            st.plotly_chart(fig1, use_container_width=True)
+        with col2:
+            fig2 = px.pie(
+                names=["Improved", "No Improvement"],
+                values=[manual_improve, manual_no_improve],
+                title="Manual DCs"
+            )
+            st.plotly_chart(fig2, use_container_width=True)
+
+        # Optional: Bar Chart Summary
+        st.subheader("📈 Bar Chart Comparison")
+        compare_df = pd.DataFrame({
+            "Method": ["Cluster-based", "Cluster-based", "Manual", "Manual"],
+            "Outcome": ["Improved", "No Improvement", "Improved", "No Improvement"],
+            "Count": [cluster_improve, cluster_no_improve, manual_improve, manual_no_improve]
+        })
+        fig_bar = px.bar(compare_df, x="Method", y="Count", color="Outcome", barmode="group", title="Prediction Outcome Comparison")
+        st.plotly_chart(fig_bar, use_container_width=True)
+
