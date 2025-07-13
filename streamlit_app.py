@@ -74,17 +74,6 @@ def generate_comparison_pdf_matplotlib(
     cluster_total = cluster_improve + cluster_no_improve
     manual_total = manual_improve + manual_no_improve
 
-    # --- Numerical Summary: Two Columns ---
-    pdf.set_font("Arial", 'B', 12)
-    pdf.cell(95, 10, txt="Cluster-based DC Results", ln=0)
-    pdf.cell(95, 10, txt="Manual DC Results", ln=1)
-    pdf.set_font("Arial", '', 12)
-    pdf.cell(95, 8, txt=f"Improved: {cluster_improve} ({(cluster_improve / cluster_total)*100:.1f}%)", ln=0)
-    pdf.cell(95, 8, txt=f"Improved: {manual_improve} ({(manual_improve / manual_total)*100:.1f}%)", ln=1)
-    pdf.cell(95, 8, txt=f"No Improvement: {cluster_no_improve} ({(cluster_no_improve / cluster_total)*100:.1f}%)", ln=0)
-    pdf.cell(95, 8, txt=f"No Improvement: {manual_no_improve} ({(manual_no_improve / manual_total)*100:.1f}%)", ln=1)
-    pdf.ln(10)
-
     # --- DC Coordinates ---
     pdf.set_font("Arial", 'B', 12)
     pdf.cell(95, 10, txt="Cluster-based DC Coordinates", ln=0)
@@ -109,6 +98,17 @@ def generate_comparison_pdf_matplotlib(
         pdf.cell(95, 8, txt=manual_coord, ln=1)
     pdf.ln(5)
 
+    # --- Numerical Summary: Two Columns ---
+    pdf.set_font("Arial", 'B', 12)
+    pdf.cell(95, 10, txt="Cluster-based DC Results", ln=0)
+    pdf.cell(95, 10, txt="Manual DC Results", ln=1)
+    pdf.set_font("Arial", '', 12)
+    pdf.cell(95, 8, txt=f"Improved: {cluster_improve} ({(cluster_improve / cluster_total)*100:.1f}%)", ln=0)
+    pdf.cell(95, 8, txt=f"Improved: {manual_improve} ({(manual_improve / manual_total)*100:.1f}%)", ln=1)
+    pdf.cell(95, 8, txt=f"No Improvement: {cluster_no_improve} ({(cluster_no_improve / cluster_total)*100:.1f}%)", ln=0)
+    pdf.cell(95, 8, txt=f"No Improvement: {manual_no_improve} ({(manual_no_improve / manual_total)*100:.1f}%)", ln=1)
+    pdf.ln(10)
+    
     # --- Pie Charts Side by Side ---
     pdf.set_font("Arial", 'B', 12)
     pdf.cell(200, 10, txt="Visual Comparison - Pie Charts", ln=True, align="C")
@@ -119,11 +119,12 @@ def generate_comparison_pdf_matplotlib(
     pdf.image(pie2, x=110, y=pdf.get_y(), w=85)
     pdf.ln(90)
 
-    # --- Bar Chart ---
+    # --- Bar Chart on New Page ---
+    pdf.add_page()
     pdf.set_font("Arial", 'B', 12)
     pdf.cell(200, 10, txt="Bar Chart Summary", ln=True, align="C")
-    pdf.image(bar, x=15, y=pdf.get_y(), w=180)
-    pdf.ln(85)
+    pdf.ln(5)
+    pdf.image(bar, x=15, y=30, w=180)
 
     # --- Output ---
     pdf_output = BytesIO()
