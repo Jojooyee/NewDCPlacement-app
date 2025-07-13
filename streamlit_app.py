@@ -417,3 +417,27 @@ with tab3:
         })
         fig_bar = px.bar(compare_df, x="Method", y="Count", color="Outcome", barmode="group", title="Prediction Outcome Comparison")
         st.plotly_chart(fig_bar, use_container_width=True)
+
+
+        # Export to PDF using browser print (no download)
+        st.divider()
+        st.markdown("### Export Report")
+        st.markdown(
+            """
+            <button onclick="window.print()" style="
+                background-color: #4CAF50;
+                border: none;
+                color: white;
+                padding: 10px 20px;
+                text-align: center;
+                text-decoration: none;
+                display: inline-block;
+                font-size: 16px;
+                margin-top: 10px;
+                border-radius: 5px;
+                cursor: pointer;
+            ">Print or Save as PDF</button>
+            """,
+            unsafe_allow_html=True
+        )
+
