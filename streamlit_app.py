@@ -321,6 +321,7 @@ with tab2:
         simulated_df["delivery_time_improvement_pred"] = predictions
         simulated_df["improvement_probability"] = prediction_probs
 
+        st.divider()
         st.markdown("### Prediction Summary")
         improve_count = (simulated_df["delivery_time_improvement_pred"] == 1).sum()
         no_improve_count = (simulated_df["delivery_time_improvement_pred"] == 0).sum()
@@ -337,6 +338,7 @@ with tab2:
         st.plotly_chart(fig_pie, use_container_width=True)
 
         # --- AI-Powered Recommendation for Manual DC Location ---
+        st.divider()
         show_ai_recommendation(improve_count, no_improve_count, context="manual proposed DC locations")
 
 # TAB 3: Comparison Summary
