@@ -8,40 +8,59 @@ import requests
 
 from fpdf import FPDF
 from io import BytesIO
-import plotly.io as pio
-def generate_comparison_pdf(cluster_improve, cluster_no_improve, manual_improve, manual_no_improve):
+
+def generate_comparison_pdf(
+    cluster_improve, cluster_no_improve,
+    manual_improve, manual_no_improve,
+    cluster_dc_coords, manual_dc_coords,
+    ai_recommendation_text
+):
     pdf = FPDF()
     pdf.add_page()
-    pdf.set_font("Arial", size=12)
-
-    # Title
+    pdf.set_font("Arial", "B", 14)
     pdf.cell(200, 10, txt="DC Placement Comparison Report", ln=True, align="C")
     pdf.ln(10)
 
-    # Cluster-based Summary
-    cluster_total = cluster_improve + cluster_no_improve
-    cluster_improve_pct = (cluster_improve / cluster_total) * 100
-    cluster_no_improve_pct = (cluster_no_improve / cluster_total) * 100
-
+    # --- Section 1: Cluster-based DC Coordinates ---
     pdf.set_font("Arial", "B", 12)
-    pdf.cell(200, 10, txt="Cluster-based DC Results", ln=True)
-    pdf.set_font("Arial", size=12)
-    pdf.cell(200, 10, txt=f"Improved: {cluster_improve} ({cluster_improve_pct:.1f}%)", ln=True)
-    pdf.cell(200, 10, txt=f"No Improvement: {cluster_no_improve} ({cluster_no_improve_pct:.1f}%)", ln=True)
+    pdf.cell(200, 10, txt="Cluster-based DC Coordinates", ln=True)
+    pdf.set_font("Arial", size=11)
+    for cluster, coords in cluster_dc_coords.items():
+        pdf.cell(200, 8, txt=f"Cluster {cluster}: Latitude {coords[0]:.4f}, Longitude {coords[1]:.4f}", ln=True)
+    pdf.ln(5)
+
+    # --- Section 2: Manual DC Coordinates ---
+    pdf.set_font("Arial", "B", 12)
+    pdf.cell(200, 10, txt="Manual DC Coordinates", ln=True)
+    pdf.set_font("Arial", size=11)
+    for i, (lat, lon) in enumerate(manual_dc_coords):
+        pdf.cell(200, 8, txt=f"Manual DC {i + 1}: Latitude {lat:.4f}, Longitude {lon:.4f}", ln=True)
     pdf.ln(10)
 
-    # Manual Summary
+    # --- Section 3: Prediction Summary ---
+    cluster_total = cluster_improve + cluster_no_improve
     manual_total = manual_improve + manual_no_improve
-    manual_improve_pct = (manual_improve / manual_total) * 100
-    manual_no_improve_pct = (manual_no_improve / manual_total) * 100
 
     pdf.set_font("Arial", "B", 12)
-    pdf.cell(200, 10, txt="Manual DC Results", ln=True)
-    pdf.set_font("Arial", size=12)
-    pdf.cell(200, 10, txt=f"Improved: {manual_improve} ({manual_improve_pct:.1f}%)", ln=True)
-    pdf.cell(200, 10, txt=f"No Improvement: {manual_no_improve} ({manual_no_improve_pct:.1f}%)", ln=True)
+    pdf.cell(200, 10, txt="Prediction Summary", ln=True)
+    pdf.set_font("Arial", size=11)
 
-    # Return buffer
+    pdf.cell(200, 8, txt=f"Cluster-based Improved: {cluster_improve} ({(cluster_improve / cluster_total * 100):.1f}%)", ln=True)
+    pdf.cell(200, 8, txt=f"Cluster-based No Improvement: {cluster_no_improve} ({(cluster_no_improve / cluster_total * 100):.1f}%)", ln=True)
+    pdf.ln(5)
+    pdf.cell(200, 8, txt=f"Manual Improved: {manual_improve} ({(manual_improve / manual_total * 100):.1f}%)", ln=True)
+    pdf.cell(200, 8, txt=f"Manual No Improvement: {manual_no_improve} ({(manual_no_improve / manual_total * 100):.1f}%)", ln=True)
+    pdf.ln(10)
+
+    # --- Section 4: AI Recommendation ---
+    pdf.set_font("Arial", "B", 12)
+    pdf.cell(200, 10, txt="AI-Generated Recommendation", ln=True)
+    pdf.set_font("Arial", size=11)
+    for line in ai_recommendation_text.split("\n"):
+        pdf.multi_cell(0, 8, txt=line)
+    pdf.ln(5)
+
+    # Return BytesIO
     pdf_buffer = BytesIO()
     pdf.output(pdf_buffer)
     pdf_buffer.seek(0)
