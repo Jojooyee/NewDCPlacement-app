@@ -187,7 +187,7 @@ def generate_comparison_pdf_matplotlib(cluster_improve, cluster_no_improve, manu
     # --- Bar Chart on New Page ---
     pdf.add_page()
     pdf.set_font("Times", 'B', 12)
-    pdf.cell(200, 10, txt="Bar Chart Summary", ln=True, align="C")
+    pdf.cell(200, 10, txt="Visual Comparison - Bar Charts", ln=True, align="C")
     pdf.ln(5)
     pdf.image(bar, x=15, y=30, w=180)
 
