@@ -336,14 +336,14 @@ with tab2:
         )
         st.plotly_chart(fig_pie, use_container_width=True)
 
-        st.markdown("### 📋 Simulated Results Table")
+        st.markdown("### Simulated Results Table")
         st.dataframe(simulated_df)
 
         st.success("Prediction completed. Results shown above.")
 
 # --- TAB 3: Comparison Summary ---
 with tab3:
-    st.header("📊 Comparison of Cluster-based vs Manual DC Placement")
+    st.header("Comparison of Cluster-based vs Manual DC Placement")
 
     if "simulated_df" not in locals() or "df" not in locals():
         st.warning("Please run predictions in both tabs first (Cluster-based and Manual) to view comparison.")
@@ -355,7 +355,7 @@ with tab3:
         manual_improve = (simulated_df["delivery_time_improvement_pred"] == 1).sum()
         manual_no_improve = (simulated_df["delivery_time_improvement_pred"] == 0).sum()
 
-        st.subheader("📌 Numeric Comparison")
+        st.subheader("Numeric Comparison")
         col1, col2 = st.columns(2)
         with col1:
             st.metric("Cluster-based Improved", cluster_improve)
@@ -365,7 +365,7 @@ with tab3:
             st.metric("Manual No Improvement", manual_no_improve)
 
         # Pie Charts Side by Side
-        st.subheader("🥧 Visual Comparison")
+        st.subheader("Visual Comparison")
 
         col1, col2 = st.columns(2)
         with col1:
@@ -384,7 +384,7 @@ with tab3:
             st.plotly_chart(fig2, use_container_width=True)
 
         # Optional: Bar Chart Summary
-        st.subheader("📈 Bar Chart Comparison")
+        st.subheader("Bar Chart Comparison")
         compare_df = pd.DataFrame({
             "Method": ["Cluster-based", "Cluster-based", "Manual", "Manual"],
             "Outcome": ["Improved", "No Improvement", "Improved", "No Improvement"],
