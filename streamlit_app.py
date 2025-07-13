@@ -66,7 +66,7 @@ def generate_comparison_pdf_matplotlib(
     pdf = FPDF()
     pdf.add_page()
     pdf.set_font("Arial", 'B', 16)
-    pdf.cell(200, 10, txt="📦 DC Placement Comparison Report", ln=True, align="C")
+    pdf.cell(200, 10, txt="DC Placement Comparison Report", ln=True, align="C")
     pdf.set_font("Arial", '', 12)
     pdf.cell(200, 10, txt="Generated Insights on Clustered vs Manual Distribution Centers", ln=True, align="C")
     pdf.ln(10)
