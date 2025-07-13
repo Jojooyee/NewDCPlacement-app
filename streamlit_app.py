@@ -346,6 +346,21 @@ with tab3:
     if "simulated_df" not in locals() or "df" not in locals():
         st.warning("Please run predictions in both tabs first (Cluster-based and Manual) to view comparison.")
     else:
+        # --- Show Cluster-based DC Coordinates ---
+        st.subheader("Cluster-based DC Coordinates")
+        unique_dc_locations = df.groupby("cluster")[["new_dc_latitude", "new_dc_longitude"]].first().reset_index()
+        unique_dc_locations = unique_dc_locations.rename(columns={
+            "new_dc_latitude": "Latitude", "new_dc_longitude": "Longitude"
+        })
+        unique_dc_locations["Cluster"] = "Cluster " + unique_dc_locations["cluster"].astype(str)
+        st.dataframe(unique_dc_locations[["Cluster", "Latitude", "Longitude"]])
+
+        # --- Show Manually Proposed DC Coordinates ---
+        st.subheader("Manual DC Coordinates")
+        manual_dc_df = pd.DataFrame(new_dc_locations, columns=["Latitude", "Longitude"])
+        manual_dc_df["DC ID"] = [f"Manual DC {i+1}" for i in range(len(new_dc_locations))]
+        st.dataframe(manual_dc_df[["DC ID", "Latitude", "Longitude"]])
+
         # Get prediction counts
         cluster_improve = (df["delivery_time_improvement_pred"] == 1).sum()
         cluster_no_improve = (df["delivery_time_improvement_pred"] == 0).sum()
