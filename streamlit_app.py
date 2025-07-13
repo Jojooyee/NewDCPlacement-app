@@ -29,19 +29,42 @@ def generate_comparison_pdf_matplotlib(
         return buf
 
     def create_bar_chart():
-        methods = ['Cluster', 'Cluster', 'Manual', 'Manual']
-        outcomes = ['Improved', 'No Improvement'] * 2
-        values = [cluster_improve, cluster_no_improve, manual_improve, manual_no_improve]
-
-        colors = ['green', 'red', 'green', 'red']
+        import numpy as np
+        import matplotlib.pyplot as plt
+        from io import BytesIO
+    
+        methods = ['Cluster-based', 'Manual']
+        outcomes = ['Improved', 'No Improvement']
+    
+        # Data values
+        values = {
+            'Cluster-based': [cluster_improve, cluster_no_improve],
+            'Manual': [manual_improve, manual_no_improve]
+        }
+    
+        bar_width = 0.35
+        x = np.arange(len(methods))  # [0, 1]
+    
         fig, ax = plt.subplots()
-        bars = ax.bar(methods, values, color=colors)
-        ax.set_title("Bar Chart Comparison")
+    
+        # Plot bars for each outcome
+        bar1 = ax.bar(x - bar_width / 2, [values[m][0] for m in methods], bar_width, label='Improved', color='green')
+        bar2 = ax.bar(x + bar_width / 2, [values[m][1] for m in methods], bar_width, label='No Improvement', color='red')
+    
+        ax.set_xlabel('Method')
+        ax.set_ylabel('User Count')
+        ax.set_title('Prediction Outcome Comparison')
+        ax.set_xticks(x)
+        ax.set_xticklabels(methods)
+        ax.legend()
+    
         buf = BytesIO()
+        plt.tight_layout()
         plt.savefig(buf, format='png')
         buf.seek(0)
         plt.close()
         return buf
+
 
     pie1 = create_pie_chart(["Improved", "No Improvement"], [cluster_improve, cluster_no_improve], "Cluster-based DCs")
     pie2 = create_pie_chart(["Improved", "No Improvement"], [manual_improve, manual_no_improve], "Manual DCs")
