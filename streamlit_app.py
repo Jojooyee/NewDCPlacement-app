@@ -6,6 +6,12 @@ import joblib
 from preprocessing_utils import HighCardinalityDropper, ColumnDropper
 import requests
 
+from fpdf import FPDF
+import plotly.io as pio
+from io import BytesIO
+import base64
+
+
 # Load Data
 @st.cache_data
 def load_data():
@@ -76,6 +82,48 @@ def haversine(lat1, lon1, lat2, lon2):
     c = 2 * np.arctan2(np.sqrt(a), np.sqrt(1 - a))
 
     return R * c
+
+def generate_comparison_pdf():
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_font("Arial", size=12)
+
+    # Header
+    pdf.set_font("Arial", 'B', size=14)
+    pdf.cell(200, 10, "DC Placement Comparison Report", ln=True, align='C')
+    pdf.ln(10)
+
+    # Text Summary
+    pdf.set_font("Arial", size=12)
+    pdf.multi_cell(0, 10, f"""
+        Cluster-based DCs:
+        - Improved: {cluster_improve} ({(cluster_improve / cluster_total * 100):.1f}%)
+        - No Improvement: {cluster_no_improve} ({(cluster_no_improve / cluster_total * 100):.1f}%)
+        
+        Manual DCs:
+        - Improved: {manual_improve} ({(manual_improve / manual_total * 100):.1f}%)
+        - No Improvement: {manual_no_improve} ({(manual_no_improve / manual_total * 100):.1f}%)
+            """)
+
+    # Export and attach Plotly charts
+    for fig, label in [
+        (fig1, "cluster_pie.png"),
+        (fig2, "manual_pie.png"),
+        (fig_bar, "bar_chart.png")
+    ]:
+        img_bytes = pio.to_image(fig, format="png")
+        img_path = f"/tmp/{label}"
+        with open(img_path, "wb") as f:
+            f.write(img_bytes)
+        pdf.image(img_path, w=180)
+        pdf.ln(5)
+
+    # Output to buffer
+    pdf_buffer = BytesIO()
+    pdf.output(pdf_buffer)
+    pdf_buffer.seek(0)
+    return pdf_buffer
+
 
 # --- Page Setup ---
 st.set_page_config(page_title="DC Placement App", layout="wide")
@@ -418,26 +466,11 @@ with tab3:
         fig_bar = px.bar(compare_df, x="Method", y="Count", color="Outcome", barmode="group", title="Prediction Outcome Comparison")
         st.plotly_chart(fig_bar, use_container_width=True)
 
-
-        # Export to PDF using browser print (no download)
         st.divider()
-        st.markdown("### Export Report")
-        st.markdown(
-            """
-            <button onclick="window.print()" style="
-                background-color: #4CAF50;
-                border: none;
-                color: white;
-                padding: 10px 20px;
-                text-align: center;
-                text-decoration: none;
-                display: inline-block;
-                font-size: 16px;
-                margin-top: 10px;
-                border-radius: 5px;
-                cursor: pointer;
-            ">Print or Save as PDF</button>
-            """,
-            unsafe_allow_html=True
-        )
-
+        st.subheader("📥 Download Summary Report")
+        
+        if st.button("Generate & Download PDF Report"):
+            pdf_data = generate_comparison_pdf()
+            b64_pdf = base64.b64encode(pdf_data.read()).decode('utf-8')
+            href = f'<a href="data:application/pdf;base64,{b64_pdf}" download="dc_comparison_report.pdf">📄 Click here to download your PDF report</a>'
+            st.markdown(href, unsafe_allow_html=True)
