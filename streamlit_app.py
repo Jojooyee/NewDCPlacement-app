@@ -56,7 +56,11 @@ def generate_comparison_pdf(
     pdf.set_font("Arial", "B", 12)
     pdf.cell(200, 10, txt="AI-Generated Recommendation", ln=True)
     pdf.set_font("Arial", size=11)
-    for line in ai_recommendation_text.split("\n"):
+    
+    # Wrap long lines
+    import textwrap
+    wrapped_text = textwrap.fill(ai_recommendation_text, width=90)
+    for line in wrapped_text.split("\n"):
         pdf.multi_cell(0, 8, txt=line)
     pdf.ln(5)
 
