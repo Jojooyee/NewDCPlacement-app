@@ -346,15 +346,16 @@ with tab3:
     if "simulated_df" not in locals() or "df" not in locals():
         st.warning("Please run predictions in both tabs first (Cluster-based and Manual) to view comparison.")
     else:
-        # --- Show Cluster-based DC Coordinates ---
-        st.subheader("Cluster-based DC Coordinates")
-        for idx, row in unique_dc_locations.iterrows():
-            st.markdown(f"- **Cluster {row['cluster']}**: Latitude `{row['new_dc_latitude']:.4f}`, Longitude `{row['new_dc_longitude']:.4f}`")
-        
-        # --- Show Manually Proposed DC Coordinates ---
-        st.subheader("Manual DC Coordinates")
-        for i, (lat, lon) in enumerate(new_dc_locations):
-            st.markdown(f"- **Manual DC {i + 1}**: Latitude `{lat:.4f}`, Longitude `{lon:.4f}`")
+        # Location of DC
+        col1, col2 = st.columns(2)
+        with col1:
+            st.subheader("Cluster-based DC Coordinates")
+            for idx, row in unique_dc_locations.iterrows():
+                st.markdown(f"- **Cluster {row['cluster']}**: Latitude `{row['new_dc_latitude']:.4f}`, Longitude `{row['new_dc_longitude']:.4f}`")
+        with col2:
+            st.subheader("Manual DC Coordinates")
+            for i, (lat, lon) in enumerate(new_dc_locations):
+                st.markdown(f"- **Manual DC {i + 1}**: Latitude `{lat:.4f}`, Longitude `{lon:.4f}`")
 
         # Get prediction counts
         cluster_improve = (df["delivery_time_improvement_pred"] == 1).sum()
@@ -364,13 +365,18 @@ with tab3:
         manual_no_improve = (simulated_df["delivery_time_improvement_pred"] == 0).sum()
 
         st.subheader("Numeric Comparison")
+
+        # Totals for percentage calculations
+        cluster_total = cluster_improve + cluster_no_improve
+        manual_total = manual_improve + manual_no_improve
+
         col1, col2 = st.columns(2)
         with col1:
-            st.metric("Cluster-based Improved", cluster_improve)
-            st.metric("Cluster-based No Improvement", cluster_no_improve)
+            st.metric("Cluster-based Improved", f"{cluster_improve} ({(cluster_improve / cluster_total * 100):.1f}%)")
+            st.metric("Cluster-based No Improvement", f"{cluster_no_improve} ({(cluster_no_improve / cluster_total * 100):.1f}%)")
         with col2:
-            st.metric("Manual Improved", manual_improve)
-            st.metric("Manual No Improvement", manual_no_improve)
+            st.metric("Manual Improved", f"{manual_improve} ({(manual_improve / manual_total * 100):.1f}%)")
+            st.metric("Manual No Improvement", f"{manual_no_improve} ({(manual_no_improve / manual_total * 100):.1f}%)")
 
         # Pie Charts Side by Side
         st.subheader("Visual Comparison")
