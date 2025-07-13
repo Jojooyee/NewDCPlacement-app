@@ -53,7 +53,7 @@ def show_ai_recommendation(improve_count, no_improve_count, context="suggested c
     - Improved: {improve_count}
     - Not Improved: {no_improve_count}
 
-    Explain why the {context} are effective and what logistics reasoning supports it.
+    Give short explanation on why the {context} are effective and what logistics reasoning supports it.
     """
 
     with st.spinner("Generating AI recommendation..."):
