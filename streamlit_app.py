@@ -6,34 +6,6 @@ import joblib
 from preprocessing_utils import HighCardinalityDropper, ColumnDropper
 import requests
 
-from fpdf import FPDF
-from datetime import datetime
-import io
-
-def generate_summary_pdf(cluster_improve, cluster_no_improve, manual_improve, manual_no_improve):
-    pdf = FPDF()
-    pdf.add_page()
-    pdf.set_font("Arial", size=12)
-
-    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    pdf.cell(200, 10, txt="📦 DC Placement Summary Report", ln=True, align="C")
-    pdf.cell(200, 10, txt=f"Generated: {now}", ln=True, align="C")
-    pdf.ln(10)
-
-    pdf.cell(200, 10, txt="🔹 Cluster-Based DC Placement", ln=True)
-    pdf.cell(200, 10, txt=f"- Improved Deliveries: {cluster_improve}", ln=True)
-    pdf.cell(200, 10, txt=f"- No Improvement: {cluster_no_improve}", ln=True)
-
-    pdf.ln(5)
-    pdf.cell(200, 10, txt="🔸 Manual Proposed DC Placement", ln=True)
-    pdf.cell(200, 10, txt=f"- Improved Deliveries: {manual_improve}", ln=True)
-    pdf.cell(200, 10, txt=f"- No Improvement: {manual_no_improve}", ln=True)
-
-    # --- Convert PDF to BytesIO ---
-    pdf_bytes = pdf.output(dest='S').encode('latin1')
-    pdf_buffer = io.BytesIO(pdf_bytes)
-    return pdf_buffer
-
 # Load Data
 @st.cache_data
 def load_data():
@@ -418,14 +390,3 @@ with tab3:
         })
         fig_bar = px.bar(compare_df, x="Method", y="Count", color="Outcome", barmode="group", title="Prediction Outcome Comparison")
         st.plotly_chart(fig_bar, use_container_width=True)
-
-        # PDF Export Section
-        st.subheader("Download Summary Report")
-        if st.button("Generate PDF"):
-            pdf_file = generate_summary_pdf(cluster_improve, cluster_no_improve, manual_improve, manual_no_improve)
-            st.download_button(
-                label="📄 Click to Download PDF",
-                data=pdf_file,
-                file_name="dc_summary_report.pdf",
-                mime="application/pdf"
-            )
