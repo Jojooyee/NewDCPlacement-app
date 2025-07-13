@@ -9,33 +9,43 @@ import requests
 from fpdf import FPDF
 from io import BytesIO
 import plotly.io as pio
-def generate_comparison_pdf(fig1, fig2, fig_bar):
+def generate_comparison_pdf(cluster_improve, cluster_no_improve, manual_improve, manual_no_improve):
     pdf = FPDF()
     pdf.add_page()
     pdf.set_font("Arial", size=12)
-    pdf.cell(200, 10, txt="Comparison of Cluster-based vs Manual DC Placement", ln=True)
 
-    # Add pie chart 1 (Cluster)
-    pdf.cell(200, 10, txt="Cluster-based DCs", ln=True)
-    img_bytes1 = pio.to_image(fig1, format="png", width=600, height=400, scale=2)
-    pdf.image(BytesIO(img_bytes1), x=10, y=None, w=180)
+    # Title
+    pdf.cell(200, 10, txt="DC Placement Comparison Report", ln=True, align="C")
+    pdf.ln(10)
 
-    # Add pie chart 2 (Manual)
-    pdf.cell(200, 10, txt="Manual DCs", ln=True)
-    img_bytes2 = pio.to_image(fig2, format="png", width=600, height=400, scale=2)
-    pdf.image(BytesIO(img_bytes2), x=10, y=None, w=180)
+    # Cluster-based Summary
+    cluster_total = cluster_improve + cluster_no_improve
+    cluster_improve_pct = (cluster_improve / cluster_total) * 100
+    cluster_no_improve_pct = (cluster_no_improve / cluster_total) * 100
 
-    # Add bar chart
-    pdf.cell(200, 10, txt="Bar Chart Comparison", ln=True)
-    img_bytes3 = pio.to_image(fig_bar, format="png", width=600, height=400, scale=2)
-    pdf.image(BytesIO(img_bytes3), x=10, y=None, w=180)
+    pdf.set_font("Arial", "B", 12)
+    pdf.cell(200, 10, txt="Cluster-based DC Results", ln=True)
+    pdf.set_font("Arial", size=12)
+    pdf.cell(200, 10, txt=f"Improved: {cluster_improve} ({cluster_improve_pct:.1f}%)", ln=True)
+    pdf.cell(200, 10, txt=f"No Improvement: {cluster_no_improve} ({cluster_no_improve_pct:.1f}%)", ln=True)
+    pdf.ln(10)
 
-    # Export as in-memory file
+    # Manual Summary
+    manual_total = manual_improve + manual_no_improve
+    manual_improve_pct = (manual_improve / manual_total) * 100
+    manual_no_improve_pct = (manual_no_improve / manual_total) * 100
+
+    pdf.set_font("Arial", "B", 12)
+    pdf.cell(200, 10, txt="Manual DC Results", ln=True)
+    pdf.set_font("Arial", size=12)
+    pdf.cell(200, 10, txt=f"Improved: {manual_improve} ({manual_improve_pct:.1f}%)", ln=True)
+    pdf.cell(200, 10, txt=f"No Improvement: {manual_no_improve} ({manual_no_improve_pct:.1f}%)", ln=True)
+
+    # Return buffer
     pdf_buffer = BytesIO()
     pdf.output(pdf_buffer)
     pdf_buffer.seek(0)
     return pdf_buffer
-
 
 # Load Data
 @st.cache_data
@@ -453,7 +463,8 @@ with tab3:
         st.divider()
         st.subheader("Download Comparison Report")
         
-        pdf_file = generate_comparison_pdf(fig1, fig2, fig_bar)
+        pdf_file = generate_comparison_pdf(cluster_improve, cluster_no_improve, manual_improve, manual_no_improve)
+
         
         st.download_button(
             label="📄 Download PDF Report",
