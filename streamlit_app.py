@@ -361,7 +361,7 @@ with tab2:
     st.subheader("Manual DC Simulation")
 
     # Section 1: Lat and long input
-    st.markdown("**Guideline:** Enter valid geographical coordinates for each proposed Distribution Center (DC)"
+    st.markdown("**Guideline:** Select number of location and Enter valid geographical coordinates for each proposed Distribution Center"
                 "\n- **Latitude** ranges from **-90 to 90** (e.g., `3.1319` for Kuala Lumpur)"
                 "\n- **Longitude** ranges from **-180 to 180** (e.g., `101.6841` for Kuala Lumpur)"
                 "\n- Make sure values are within realistic bounds and not zero unless intentional.")
@@ -466,19 +466,19 @@ with tab2:
 
 # TAB 3: Comparison Summary
 with tab3:
-    st.header("Comparison of Cluster-based vs Manual DC Placement")
+    st.header("Comparison of Cluster-based vs Manual Distribution Center Placement")
 
     if "simulated_df" not in locals() or "df" not in locals():
-        st.warning("Please run predictions in both tabs first (Cluster-based and Manual) to view comparison.")
+        st.warning("Please run predictions in both tabs first (Cluster-based and Manual) to view comparison summary.")
     else:
         # Location of DC
         col1, col2 = st.columns(2)
         with col1:
-            st.subheader("Cluster-based DC Coordinates")
+            st.subheader("Cluster-based Distribution Center Coordinates")
             for idx, row in unique_dc_locations.iterrows():
                 st.markdown(f"- **Cluster {row['cluster']}**: Latitude `{row['new_dc_latitude']:.4f}`, Longitude `{row['new_dc_longitude']:.4f}`")
         with col2:
-            st.subheader("Manual DC Coordinates")
+            st.subheader("Manual Distribution Center Coordinates")
             for i, (lat, lon) in enumerate(new_dc_locations):
                 st.markdown(f"- **Manual DC {i + 1}**: Latitude `{lat:.4f}`, Longitude `{lon:.4f}`")
 
@@ -504,7 +504,7 @@ with tab3:
             st.metric("Manual Improved", f"{manual_improve} ({(manual_improve / manual_total * 100):.1f}%)")
             st.metric("Manual No Improvement", f"{manual_no_improve} ({(manual_no_improve / manual_total * 100):.1f}%)")
 
-        # Pie Charts Side by Side
+        # Pie Charts 
         st.divider()
         st.subheader("Visual Comparison")
 
@@ -513,7 +513,7 @@ with tab3:
             fig1 = px.pie(
                 names=["Improved", "No Improvement"],
                 values=[cluster_improve, cluster_no_improve],
-                title="Cluster-based DCs"
+                title="Cluster-based Distribution Centers"
             )
             st.plotly_chart(fig1, use_container_width=True)
         with col2:
@@ -524,7 +524,7 @@ with tab3:
             )
             st.plotly_chart(fig2, use_container_width=True)
 
-        # Optional: Bar Chart Summary
+        # Bar Chart Summary
         st.divider()
         st.subheader("Bar Chart Comparison")
         compare_df = pd.DataFrame({
@@ -535,7 +535,7 @@ with tab3:
         fig_bar = px.bar(compare_df, x="Method", y="Count", color="Outcome", barmode="group", title="Prediction Outcome Comparison")
         st.plotly_chart(fig_bar, use_container_width=True)
 
-        # --- Download Button for PDF ---
+        # Download Button for PDF
         st.divider()
         st.subheader("Download Comparison Report")
         
