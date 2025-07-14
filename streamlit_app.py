@@ -272,14 +272,14 @@ with tab1:
         show_ai_recommendation(improve_count, no_improve_count)
                 
     elif result_option == "Clustering Report":
-        # Section 1: Order volume & Avg delivery time
+        # Section 1: Order volume and Avg delivery time
         st.divider()
         st.markdown("### State-Level Summary")
-        st.markdown("Below are the visualizations of order volume and average delivery time by state from the clustered dataset.")
+        st.markdown("The bar chart below visualised order volume and average delivery time by state.")
 
         col1, col2 = st.columns(2)
         with col1:
-            top_n = st.selectbox("Select number of states to display", [10, 20, 30, 40, 50], index=1)
+            top_n = st.selectbox("Select number of states to display:", [10, 20, 30, 40, 50], index=1)
         with col2:
             sort_order = st.selectbox("Sort by:", ["Lowest", "Highest"])
 
@@ -303,7 +303,7 @@ with tab1:
             x="state",
             y="avg_delivery_time_days",
             title="Avg Delivery Time (Days)",
-            labels={"avg_delivery_time_days": "Avg Delivery Time (Days)", "state": "State"},
+            labels={"avg_delivery_time_days": "Average Delivery Time (Days)", "state": "State"},
             color="avg_delivery_time_days",
             color_continuous_scale="Oranges"
         )
@@ -312,7 +312,7 @@ with tab1:
         # Section 2: Cluster map
         st.divider()
         st.markdown("### Cluster Map")
-        st.markdown("The map below shows the location of each state, colored by assigned cluster.")
+        st.markdown("The map below shows the location of each state with different colored by assigned cluster.")
 
         fig_map = px.scatter_mapbox(
             state_level_df,
@@ -331,7 +331,7 @@ with tab1:
         # Section 3: Cluster demand ranking
         st.divider()
         st.markdown("### Demand Ranking")
-        st.markdown("Clusters are ranked based on their total composite weight (indicating demand concentration).")
+        st.markdown("The clusters are ranked based on their demand concentration.")
         df["cluster"] = df["cluster"].astype(str)
 
         cluster_ranking = (
