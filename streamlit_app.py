@@ -244,7 +244,7 @@ with tab1:
         # Transform input features
         processed_df = preprocessing_pipeline.transform(df)
         
-        # Model prediction
+        # Section 3: Model prediction
         predictions = model.predict(processed_df)
         prediction_probs = model.predict_proba(processed_df)[:, 1]
 
@@ -267,7 +267,7 @@ with tab1:
         )
         st.plotly_chart(fig_pie, use_container_width=True)
 
-        # Section 3: AI Recommendation
+        # Section 4: AI Recommendation
         st.divider()
         show_ai_recommendation(improve_count, no_improve_count)
                 
@@ -356,15 +356,19 @@ with tab1:
                 st.markdown(f"**Average order volume**: `{total_order_volume:,}`")
                 st.markdown(f"**Average delivery time (days)**: `{avg_delivery_time:.2f}`")
 
-# --- TAB 2: Manual Proposed DC Location---
+# TAB 2: Manual Proposed DC Location
 with tab2:
     st.subheader("Manual DC Simulation")
-    st.markdown("Simulate multiple proposed DC locations by entering coordinates below.")
+    st.markdown("Run prediction on multiple proposed distribution center locations by entering coordinates below.")
 
-    # Step 1: Let user input how many DCs they want to enter
+    # Section 1: Lat and long input
+    st.markdown("**Guideline:** Enter valid geographical coordinates for each proposed Distribution Center (DC).<br>"
+                "- **Latitude** ranges from **-90 to 90** (e.g., `3.1390` for Kuala Lumpur)<br>"
+                "- **Longitude** ranges from **-180 to 180** (e.g., `101.6869` for Kuala Lumpur)<br>"
+                "- Make sure values are within realistic bounds and not zero unless intentional.",
+                unsafe_allow_html=True)
     num_points = st.number_input("Enter number of proposed DC locations:", min_value=1, max_value=10, value=1, step=1)
 
-    # Step 2: Show input fields dynamically based on that number
     new_dc_locations = []
     for i in range(int(num_points)):
         st.markdown(f"#### DC Location {i + 1}")
@@ -375,12 +379,13 @@ with tab2:
             lon = st.number_input(f"Longitude {i + 1}", key=f"lon_{i}", value=0.0, format="%.6f")
         new_dc_locations.append((lat, lon))
 
-    # Step 3: Simulate Button — FIXED with a key
     if st.button("Run Prediction", key="simulate_dc_locations"):
     
-        # Step 2.5: Plot user-input coordinates on a map
+        # Section 2: dc location in map
         if new_dc_locations:
-            st.markdown("### Preview of Proposed DC Locations")
+            st.markdown("### Proposed Distribution Center Location")
+            st.markdown("The map below shows the location of proposed distribution center.")
+
             user_dc_df = pd.DataFrame(new_dc_locations, columns=["lat", "lon"])
             user_dc_df["dc_id"] = [f"DC {i+1}" for i in range(len(new_dc_locations))]
     
@@ -433,31 +438,30 @@ with tab2:
 
         simulated_processed = preprocessing_pipeline.transform(simulated_df)
 
-        # --- Make prediction (binary classification: 1 = improvement, 0 = no improvement) ---
+        # Section 3: Model prediction
         predictions = model.predict(simulated_processed)
         prediction_probs = model.predict_proba(simulated_processed)[:, 1]  # Probabilities for class 1
 
-        # --- Append predictions to DataFrame ---
         simulated_df["delivery_time_improvement_pred"] = predictions
         simulated_df["improvement_probability"] = prediction_probs
 
         st.divider()
-        st.markdown("### Prediction Summary")
+        st.markdown("### Delivery Improvement Prediction Results")
         improve_count = (simulated_df["delivery_time_improvement_pred"] == 1).sum()
         no_improve_count = (simulated_df["delivery_time_improvement_pred"] == 0).sum()
             
         st.write(f"**Users with Improved Delivery**: {improve_count}")
         st.write(f"**Users with No Improvement**: {no_improve_count}")
             
-        # Optional: Pie chart
+        # Pie chart
         fig_pie = px.pie(
             names=["Improved", "No Improvement"],
             values=[improve_count, no_improve_count],
-            title="Delivery Improvement Prediction Results"
+            title="Percentage of Improvement Deliveries"
         )
         st.plotly_chart(fig_pie, use_container_width=True)
 
-        # --- AI-Powered Recommendation for Manual DC Location ---
+        # Section 4: AI Recommendation
         st.divider()
         show_ai_recommendation(improve_count, no_improve_count, context="manual proposed DC locations")
 
