@@ -363,9 +363,9 @@ with tab2:
 
     # Section 1: Lat and long input
     st.markdown("**Guideline:** Enter valid geographical coordinates for each proposed Distribution Center (DC)"
-                "- **Latitude** ranges from **-90 to 90** (e.g., `3.1390` for Kuala Lumpur)"
-                "- **Longitude** ranges from **-180 to 180** (e.g., `101.6869` for Kuala Lumpur)"
-                "- Make sure values are within realistic bounds and not zero unless intentional.")
+                "\n- **Latitude** ranges from **-90 to 90** (e.g., `3.1390` for Kuala Lumpur)"
+                "\n- **Longitude** ranges from **-180 to 180** (e.g., `101.6869` for Kuala Lumpur)"
+                "\n- Make sure values are within realistic bounds and not zero unless intentional.")
     
     num_points = st.number_input("Enter number of proposed DC locations:", min_value=1, max_value=10, value=1, step=1)
 
