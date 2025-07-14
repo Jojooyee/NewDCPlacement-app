@@ -203,7 +203,7 @@ with tab1:
     st.header("New Distribution Center Suggestion")
     st.markdown("Select options below to display clustered-based locations and clustering report for new distribution centers.")
 
-    result_option = st.selectbox("Select:", ["New DC Location", "Clustering Report"])
+    result_option = st.selectbox("Select:", ["Suggested Location", "Clustering Report"])
 
     state_level_df = df.drop_duplicates(subset=["state"])[
         ["state", "order_volume", "avg_delivery_time_days", "state_latitude", "state_longitude", "cluster", "new_dc_latitude", "new_dc_longitude"]
@@ -211,10 +211,10 @@ with tab1:
 
     state_level_df["cluster"] = state_level_df["cluster"].astype(str)
 
-    if result_option == "New DC Location":
+    if result_option == "Suggested Location":
         # Section 1: List of new dc location
         st.divider()
-        st.markdown("### Suggested New DC Coordinates")
+        st.markdown("### New Distribution Center Coordinates")
         st.markdown("The list below shows clustered-based locations of new distribution center.")
 
         unique_dc_locations = state_level_df.groupby("cluster")[["new_dc_latitude", "new_dc_longitude"]].first().reset_index()
