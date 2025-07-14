@@ -128,7 +128,7 @@ def generate_comparison_pdf_matplotlib(cluster_improve, cluster_no_improve, manu
     pdf = FPDF()
     pdf.add_page()
     pdf.set_font("Times", 'B', 16)
-    pdf.cell(200, 10, txt="DC Placement Comparison Report", ln=True, align="C")
+    pdf.cell(200, 10, txt="Distribution Center (DC) Placement Comparison Report", ln=True, align="C")
     pdf.set_font("Times", '', 12)
     pdf.ln(10)
 
