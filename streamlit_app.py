@@ -223,6 +223,7 @@ with tab1:
             st.markdown(f"**Cluster {row['cluster']}**: ({row['new_dc_latitude']:.4f}, {row['new_dc_longitude']:.4f})")
 
         # Section 2: New dc location in map
+        st.divider()
         st.markdown("### New Distribution Center Location")
         st.markdown("The map below shows the location of new distribution center.")
 
@@ -266,7 +267,7 @@ with tab1:
         )
         st.plotly_chart(fig_pie, use_container_width=True)
 
-        # AI Recommendation
+        # Section 3: AI Recommendation
         st.divider()
         show_ai_recommendation(improve_count, no_improve_count)
                 
