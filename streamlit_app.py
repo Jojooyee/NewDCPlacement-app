@@ -13,12 +13,16 @@ import numpy as np
 # Load Data
 @st.cache_data
 def load_data():
-    # Replace with your actual GitHub raw URL
-    url = "https://raw.githubusercontent.com/Jojooyee/NewDCPlacement-app/main/test_df.csv"
-    df = pd.read_csv(url)
-    return df
+    # Replace with your actual GitHub raw URLs
+    url1 = "https://raw.githubusercontent.com/Jojooyee/NewDCPlacement-app/main/test_df.csv"
+    url2 = "https://raw.githubusercontent.com/Jojooyee/NewDCPlacement-app/main/state_demand_df.csv"
+
+    df = pd.read_csv(url1)
+    state_level_df = pd.read_csv(url2)
     
-df = load_data()
+    return df1, df2
+df, state_level_df = load_data()
+
 
 # Load Preprocess Pipeline
 # preprocessing_pipeline = joblib.load("preprocessing_pipeline.pkl")
@@ -205,9 +209,9 @@ with tab1:
 
     result_option = st.selectbox("Select:", ["Suggested Location", "Clustering Report"])
 
-    state_level_df = df.drop_duplicates(subset=["state"])[
-        ["state", "order_volume", "avg_delivery_time_days", "state_latitude", "state_longitude", "cluster", "new_dc_latitude", "new_dc_longitude"]
-    ].sort_values("state")
+    # state_level_df = df.drop_duplicates(subset=["state"])[
+    #     ["state", "order_volume", "avg_delivery_time_days", "state_latitude", "state_longitude", "cluster", "new_dc_latitude", "new_dc_longitude"]
+    # ].sort_values("state")
 
     state_level_df["cluster"] = state_level_df["cluster"].astype(str)
 
