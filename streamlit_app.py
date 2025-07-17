@@ -8,7 +8,7 @@ import requests
 from fpdf import FPDF
 from io import BytesIO
 import matplotlib.pyplot as plt
-import numpy as np
+import numpy as np 
 
 # Load Data
 @st.cache_data
