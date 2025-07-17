@@ -424,7 +424,7 @@ with tab2:
             updated_row = row.copy()
             updated_row["new_dc_latitude"] = nearest_lat
             updated_row["new_dc_longitude"] = nearest_lon
-            updated_row["distance_new_dc_to_user_km"] = min_distance
+            # updated_row["distance_new_dc_to_user_km"] = min_distance
 
             updated_rows.append(updated_row)
 
@@ -444,8 +444,8 @@ with tab2:
         predictions = model.predict(simulated_df)
         prediction_probs = model.predict_proba(simulated_df)[:, 1]  # Probabilities for class 1
 
-        # simulated_df["delivery_time_improvement_pred"] = predictions
-        # simulated_df["improvement_probability"] = prediction_probs
+        simulated_df["delivery_time_improvement_pred"] = predictions
+        simulated_df["improvement_probability"] = prediction_probs
 
         st.divider()
         st.markdown("### Delivery Improvement Prediction Results")
