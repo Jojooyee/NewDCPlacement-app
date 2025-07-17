@@ -449,11 +449,8 @@ with tab2:
 
         st.divider()
         st.markdown("### Delivery Improvement Prediction Results")
-        # improve_count = (simulated_df["delivery_time_improvement_pred"] == 1).sum()
-        # no_improve_count = (simulated_df["delivery_time_improvement_pred"] == 0).sum()
-
-        improve_count = (predictions == 1).sum()
-        no_improve_count = (predictions == 0).sum()
+        improve_count = (simulated_df["delivery_time_improvement_pred"] == 1).sum()
+        no_improve_count = (simulated_df["delivery_time_improvement_pred"] == 0).sum()
             
         st.write(f"**Users with Improved Delivery**: {improve_count}")
         st.write(f"**Users with No Improvement**: {no_improve_count}")
