@@ -429,10 +429,10 @@ with tab2:
             updated_rows.append(updated_row)
 
         # Create a new DataFrame with the updated values
-        new_dc_df = pd.DataFrame(updated_rows)
+        manual_dc_df = pd.DataFrame(updated_rows)
 
         st.markdown("### Simulated DataFrame with New DC Coordinates")
-        st.dataframe(new_dc_df)
+        st.dataframe(manual_dc_df)
         
         # # Convert delivery time from days to hours
         # delivery_time_hour = simulated_df["delivery_time_days"] * 24
@@ -444,23 +444,23 @@ with tab2:
         # simulated_df["delivery_time_improvement"] = delivery_time_hour - estimated_new_delivery_time
 
         # Section 3: Model prediction
-        # predictions = model.predict(new_dc_df)
-        # prediction_probs = model.predict_proba(new_dc_df)[:, 1]  # Probabilities for class 1
+        # predictions = model.predict(manual_dc_df)
+        # prediction_probs = model.predict_proba(manual_dc_df)[:, 1]  # Probabilities for class 1
 
         # Only pass columns the model expects
-        X = new_dc_df[model.feature_names_in_]
+        X = manual_dc_df[model.feature_names_in_]
         
         # Predict using the filtered DataFrame
         predictions = model.predict(X)
         prediction_probs = model.predict_proba(X)[:, 1]
 
-        new_dc_df["delivery_time_improvement_pred"] = predictions
-        new_dc_df["improvement_probability"] = prediction_probs
+        manual_dc_df["delivery_time_improvement_pred"] = predictions
+        manual_dc_df["improvement_probability"] = prediction_probs
 
         st.divider()
         st.markdown("### Delivery Improvement Prediction Results")
-        improve_count = (new_dc_df["delivery_time_improvement_pred"] == 1).sum()
-        no_improve_count = (new_dc_df["delivery_time_improvement_pred"] == 0).sum()
+        improve_count = (manual_dc_df["delivery_time_improvement_pred"] == 1).sum()
+        no_improve_count = (manual_dc_df["delivery_time_improvement_pred"] == 0).sum()
             
         st.write(f"**Users with Improved Delivery**: {improve_count}")
         st.write(f"**Users with No Improvement**: {no_improve_count}")
@@ -481,7 +481,7 @@ with tab2:
 with tab3:
     st.header("Comparison of Cluster-based vs Manual Distribution Center Placement")
 
-    if "new_dc_df" not in locals() or "df" not in locals():
+    if "manual_dc_df" not in locals() or "df" not in locals():
         st.warning("Please run predictions in both tabs first (Cluster-based and Manual) to view comparison summary.")
     else:
         # Location of DC
@@ -499,8 +499,8 @@ with tab3:
         cluster_improve = (df["delivery_time_improvement_pred"] == 1).sum()
         cluster_no_improve = (df["delivery_time_improvement_pred"] == 0).sum()
 
-        manual_improve = (new_dc_df["delivery_time_improvement_pred"] == 1).sum()
-        manual_no_improve = (new_dc_df["delivery_time_improvement_pred"] == 0).sum()
+        manual_improve = (manual_dc_df["delivery_time_improvement_pred"] == 1).sum()
+        manual_no_improve = (manual_dc_df["delivery_time_improvement_pred"] == 0).sum()
 
         st.divider()
         st.subheader("Numeric Comparison")
