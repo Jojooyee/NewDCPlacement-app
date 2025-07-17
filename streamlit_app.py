@@ -444,8 +444,15 @@ with tab2:
         # simulated_df["delivery_time_improvement"] = delivery_time_hour - estimated_new_delivery_time
 
         # Section 3: Model prediction
-        predictions = model.predict(new_dc_df)
-        prediction_probs = model.predict_proba(new_dc_df)[:, 1]  # Probabilities for class 1
+        # predictions = model.predict(new_dc_df)
+        # prediction_probs = model.predict_proba(new_dc_df)[:, 1]  # Probabilities for class 1
+
+        # Only pass columns the model expects
+        X = new_dc_df[model.feature_names_in_]
+        
+        # Predict using the filtered DataFrame
+        predictions = model.predict(X)
+        prediction_probs = model.predict_proba(X)[:, 1]
 
         new_dc_df["delivery_time_improvement_pred"] = predictions
         new_dc_df["improvement_probability"] = prediction_probs
