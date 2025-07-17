@@ -3,7 +3,7 @@ import pandas as pd
 import plotly.express as px
 import numpy as np
 import joblib
-from preprocessing_utils import HighCardinalityDropper, ColumnDropper
+# from preprocessing_utils import HighCardinalityDropper, ColumnDropper
 import requests
 from fpdf import FPDF
 from io import BytesIO
@@ -21,7 +21,7 @@ def load_data():
 df = load_data()
 
 # Load Preprocess Pipeline
-preprocessing_pipeline = joblib.load("preprocessing_pipeline.pkl")
+# preprocessing_pipeline = joblib.load("preprocessing_pipeline.pkl")
 
 # Load trained prediction model
 model = joblib.load("delivery_improvement_model.pkl")
@@ -242,11 +242,11 @@ with tab1:
         st.plotly_chart(fig_map, use_container_width=True)
 
         # Transform input features
-        processed_df = preprocessing_pipeline.transform(df)
+        # processed_df = preprocessing_pipeline.transform(df)
         
         # Section 3: Model prediction
-        predictions = model.predict(processed_df)
-        prediction_probs = model.predict_proba(processed_df)[:, 1]
+        predictions = model.predict(df)
+        prediction_probs = model.predict_proba(df)[:, 1]
 
         df["delivery_time_improvement_pred"] = predictions
         df["improvement_probability"] = prediction_probs
