@@ -3,7 +3,6 @@ import pandas as pd
 import plotly.express as px 
 import numpy as np
 import joblib
-# from preprocessing_utils import HighCardinalityDropper, ColumnDropper
 import requests
 from fpdf import FPDF
 from io import BytesIO
@@ -23,10 +22,6 @@ def load_data():
     return df, state_level_df
     
 df, state_level_df = load_data()
-
-
-# Load Preprocess Pipeline
-# preprocessing_pipeline = joblib.load("preprocessing_pipeline.pkl")
 
 # Load trained prediction model
 model = joblib.load("delivery_improvement_model.pkl")
@@ -424,30 +419,13 @@ with tab2:
             updated_row = row.copy()
             updated_row["new_dc_latitude"] = nearest_lat
             updated_row["new_dc_longitude"] = nearest_lon
-            # updated_row["distance_new_dc_to_user_km"] = min_distance
 
             updated_rows.append(updated_row)
 
         # Create a new DataFrame with the updated values
         manual_dc_df = pd.DataFrame(updated_rows)
 
-        st.markdown("### Simulated DataFrame with New DC Coordinates")
-        st.dataframe(manual_dc_df)
-        
-        # # Convert delivery time from days to hours
-        # delivery_time_hour = simulated_df["delivery_time_days"] * 24
-        # # Calculate delivery speed (km/hour)
-        # delivery_speed_kmph = simulated_df["distance_dc_to_user_km"] / delivery_time_hour
-        # # Estimate new delivery time in hours using the same speed
-        # estimated_new_delivery_time = simulated_df["distance_new_dc_to_user_km"] / delivery_speed_kmph
-        # # Calculate improvement in hours
-        # simulated_df["delivery_time_improvement"] = delivery_time_hour - estimated_new_delivery_time
-
         # Section 3: Model prediction
-        # predictions = model.predict(manual_dc_df)
-        # prediction_probs = model.predict_proba(manual_dc_df)[:, 1]  # Probabilities for class 1
-
-        # Only pass columns the model expects
         X = manual_dc_df[model.feature_names_in_]
         
         # Predict using the filtered DataFrame
