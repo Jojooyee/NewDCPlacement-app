@@ -435,9 +435,6 @@ with tab2:
         manual_dc_df["delivery_time_improvement_pred"] = predictions
         manual_dc_df["improvement_probability"] = prediction_probs
 
-        st.markdown("### Simulated DataFrame with New DC Coordinates")
-        st.dataframe(manual_dc_df)
-
         st.divider()
         st.markdown("### Delivery Improvement Prediction Results")
         improve_count = (manual_dc_df["delivery_time_improvement_pred"] == 1).sum()
