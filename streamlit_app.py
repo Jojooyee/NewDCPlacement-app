@@ -20,7 +20,8 @@ def load_data():
     df = pd.read_csv(url1)
     state_level_df = pd.read_csv(url2)
     
-    return df1, df2
+    return df, state_level_df
+    
 df, state_level_df = load_data()
 
 
