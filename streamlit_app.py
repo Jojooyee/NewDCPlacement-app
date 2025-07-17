@@ -430,6 +430,9 @@ with tab2:
 
         # Create a new DataFrame with the updated values
         simulated_df = pd.DataFrame(updated_rows)
+
+        st.markdown("### Simulated DataFrame with New DC Coordinates")
+        st.dataframe(simulated_df)
         
         # # Convert delivery time from days to hours
         # delivery_time_hour = simulated_df["delivery_time_days"] * 24
