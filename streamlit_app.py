@@ -431,28 +431,29 @@ with tab2:
         # Create a new DataFrame with the updated values
         simulated_df = pd.DataFrame(updated_rows)
         
-        # Convert delivery time from days to hours
-        delivery_time_hour = simulated_df["delivery_time_days"] * 24
-        # Calculate delivery speed (km/hour)
-        delivery_speed_kmph = simulated_df["distance_dc_to_user_km"] / delivery_time_hour
-        # Estimate new delivery time in hours using the same speed
-        estimated_new_delivery_time = simulated_df["distance_new_dc_to_user_km"] / delivery_speed_kmph
-        # Calculate improvement in hours
-        simulated_df["delivery_time_improvement"] = delivery_time_hour - estimated_new_delivery_time
-
-        simulated_processed = preprocessing_pipeline.transform(simulated_df)
+        # # Convert delivery time from days to hours
+        # delivery_time_hour = simulated_df["delivery_time_days"] * 24
+        # # Calculate delivery speed (km/hour)
+        # delivery_speed_kmph = simulated_df["distance_dc_to_user_km"] / delivery_time_hour
+        # # Estimate new delivery time in hours using the same speed
+        # estimated_new_delivery_time = simulated_df["distance_new_dc_to_user_km"] / delivery_speed_kmph
+        # # Calculate improvement in hours
+        # simulated_df["delivery_time_improvement"] = delivery_time_hour - estimated_new_delivery_time
 
         # Section 3: Model prediction
-        predictions = model.predict(simulated_processed)
-        prediction_probs = model.predict_proba(simulated_processed)[:, 1]  # Probabilities for class 1
+        predictions = model.predict(simulated_df)
+        prediction_probs = model.predict_proba(simulated_df)[:, 1]  # Probabilities for class 1
 
-        simulated_df["delivery_time_improvement_pred"] = predictions
-        simulated_df["improvement_probability"] = prediction_probs
+        # simulated_df["delivery_time_improvement_pred"] = predictions
+        # simulated_df["improvement_probability"] = prediction_probs
 
         st.divider()
         st.markdown("### Delivery Improvement Prediction Results")
-        improve_count = (simulated_df["delivery_time_improvement_pred"] == 1).sum()
-        no_improve_count = (simulated_df["delivery_time_improvement_pred"] == 0).sum()
+        # improve_count = (simulated_df["delivery_time_improvement_pred"] == 1).sum()
+        # no_improve_count = (simulated_df["delivery_time_improvement_pred"] == 0).sum()
+
+        improve_count = (predictions == 1).sum()
+        no_improve_count = (predictions == 0).sum()
             
         st.write(f"**Users with Improved Delivery**: {improve_count}")
         st.write(f"**Users with No Improvement**: {no_improve_count}")
