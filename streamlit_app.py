@@ -357,7 +357,7 @@ with tab1:
 
 # TAB 2: Manual Proposed DC Location
 with tab2:
-    st.subheader("Manual DC Simulation")
+    st.subheader("Manual DC Prediction")
 
     # Section 1: Lat and long input
     st.markdown("**Guideline:** Select number of location and Enter valid geographical coordinates for each proposed Distribution Center"
