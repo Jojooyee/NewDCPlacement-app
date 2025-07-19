@@ -12,7 +12,6 @@ import numpy as np
 # Load Data
 @st.cache_data
 def load_data():
-    # Replace with your actual GitHub raw URLs
     url1 = "https://raw.githubusercontent.com/Jojooyee/NewDCPlacement-app/main/test_df.csv"
     url2 = "https://raw.githubusercontent.com/Jojooyee/NewDCPlacement-app/main/state_demand_df.csv"
 
