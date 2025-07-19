@@ -465,6 +465,7 @@ with tab3:
         col1, col2 = st.columns(2)
         with col1:
             st.subheader("Cluster-based Distribution Center Coordinates")
+            unique_dc_locations = state_level_df.groupby("cluster")[["new_dc_latitude", "new_dc_longitude"]].first().reset_index()
             for idx, row in unique_dc_locations.iterrows():
                 st.markdown(f"- **Cluster {row['cluster']}**: Latitude `{row['new_dc_latitude']:.4f}`, Longitude `{row['new_dc_longitude']:.4f}`")
         with col2:
