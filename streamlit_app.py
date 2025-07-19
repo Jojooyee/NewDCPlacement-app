@@ -386,8 +386,6 @@ with tab2:
 
             user_dc_df = pd.DataFrame(new_dc_locations, columns=["lat", "lon"])
             user_dc_df["dc_id"] = [f"DC {i+1}" for i in range(len(new_dc_locations))]
-
-            st.dataframe(user_dc_df)
             
             fig_user_dc = px.scatter_mapbox(
                 user_dc_df,
