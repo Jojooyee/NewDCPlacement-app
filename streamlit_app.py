@@ -250,6 +250,10 @@ with tab1:
         df["delivery_time_improvement_pred"] = predictions
         df["improvement_probability"] = prediction_probs
 
+        # Display DataFrames
+        st.markdown("### Cluster-based DC Prediction Results")
+        st.dataframe(df)
+
         st.divider()
         st.markdown("### Delivery Improvement Prediction Results")
         improve_count = (df["delivery_time_improvement_pred"] == 1).sum()
