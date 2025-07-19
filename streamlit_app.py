@@ -473,6 +473,13 @@ with tab3:
             for i, (lat, lon) in enumerate(new_dc_locations):
                 st.markdown(f"- **Manual DC {i + 1}**: Latitude `{lat:.4f}`, Longitude `{lon:.4f}`")
 
+        # Display DataFrames
+        st.markdown("### Cluster-based DC Prediction Results")
+        st.dataframe(df)
+        
+        st.markdown("### Manual DC Simulation Prediction Results")
+        st.dataframe(manual_dc_df)
+        
         # Get prediction counts
         cluster_improve = (df["delivery_time_improvement_pred"] == 1).sum()
         cluster_no_improve = (df["delivery_time_improvement_pred"] == 0).sum()
