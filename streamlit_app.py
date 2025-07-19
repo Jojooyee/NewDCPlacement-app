@@ -250,10 +250,6 @@ with tab1:
         df["delivery_time_improvement_pred"] = predictions
         df["improvement_probability"] = prediction_probs
 
-        # Display DataFrames
-        st.markdown("### Cluster-based DC Prediction Results")
-        st.dataframe(df)
-
         st.divider()
         st.markdown("### Delivery Improvement Prediction Results")
         improve_count = (df["delivery_time_improvement_pred"] == 1).sum()
@@ -390,7 +386,9 @@ with tab2:
 
             user_dc_df = pd.DataFrame(new_dc_locations, columns=["lat", "lon"])
             user_dc_df["dc_id"] = [f"DC {i+1}" for i in range(len(new_dc_locations))]
-    
+
+            st.dataframe(user_dc_df)
+            
             fig_user_dc = px.scatter_mapbox(
                 user_dc_df,
                 lat="lat",
@@ -476,13 +474,6 @@ with tab3:
             st.subheader("Manual Distribution Center Coordinates")
             for i, (lat, lon) in enumerate(new_dc_locations):
                 st.markdown(f"- **Manual DC {i + 1}**: Latitude `{lat:.4f}`, Longitude `{lon:.4f}`")
-
-        # Display DataFrames
-        st.markdown("### Cluster-based DC Prediction Results")
-        st.dataframe(df)
-        
-        st.markdown("### Manual DC Simulation Prediction Results")
-        st.dataframe(manual_dc_df)
         
         # Get prediction counts
         cluster_improve = (df["delivery_time_improvement_pred"] == 1).sum()
