@@ -56,7 +56,8 @@ def show_ai_recommendation(improve_count, no_improve_count, context="suggested c
     Based on delivery improvement prediction:
     - Improved: {improve_count}
     - Not Improved: {no_improve_count}
-    Give short explanation on why the {context} are effective and what logistics reasoning supports it.
+    Give short explanation on why the {context} are effective and what logistics reasoning supports it 
+    and short recommendation on the placements of distribution center at these location.
     """
 
     with st.spinner("Generating AI recommendation..."):
