@@ -240,9 +240,6 @@ with tab1:
         fig_map.update_layout(mapbox_style="open-street-map")
         fig_map.update_traces(marker=dict(size=10, opacity=1.0))
         st.plotly_chart(fig_map, use_container_width=True)
-
-        # Transform input features
-        # processed_df = preprocessing_pipeline.transform(df)
         
         # Section 3: Model prediction
         predictions = model.predict(df)
